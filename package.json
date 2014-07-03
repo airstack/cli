@@ -1,0 +1,28 @@
+{
+  "name": "airship-cli",
+  "version": "0.0.0",
+  "description": "Airship CLI",
+  "main": "bin/airship.js",
+  "bin": {
+    "airship": "bin/airship.js"
+  },
+  "scripts": {
+    "test": "node test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/airshipio/cli.git"
+  },
+  "keywords": [
+    "airship"
+  ],
+  "author": "Joe Johnston <joe@simple10.com> (http://simple10.com/)",
+  "license": "Apache 2.0",
+  "bugs": {
+    "url": "https://github.com/airshipio/cli/issues"
+  },
+  "homepage": "https://github.com/airshipio/cli",
+  "dependencies": {
+    "cli": "^0.6.3"
+  }
+}
