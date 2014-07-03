@@ -20,12 +20,12 @@ For MVP, the CLI focuses on the NodeJS community.
 
 ### Dependencies
 
-In NodeJS, module dependency management is a pain. NPM does a decent job of fetching and updating dependencies, 
-but that's it. There's no equivalent to Bundler's Gemfile.lock in Ruby which when used properly ensures 
+In NodeJS, module dependency management is a pain. NPM does a decent job of fetching and updating dependencies,
+but that's it. There's no equivalent to Bundler's Gemfile.lock in Ruby which when used properly ensures
 identical gems are used across dev boxes and production.
 
 
-# Prerequisites
+# Requirements
 
 For a Node CLI, node must already be installed.
 
@@ -34,7 +34,20 @@ For a Node CLI, node must already be installed.
 * Virtual: [Nave](https://github.com/isaacs/nave) or [NVM](https://github.com/creationix/nvm)
 
 
+# Installation
+
+```bash
+git clone git@github.com:airshipio/cli.git
+cd cli
+npm link
+airship up
+
+# Or
+airship -h
+```
+
+
 # Resources
 
 * [Creating a CLI in Node](http://michaelbrooks.ca/deck/jsconf2013/)
-* 
+*
