@@ -22,7 +22,7 @@ class Builder
     console.log contents
 
   _setFrom: (contents) ->
-    contents.replace /^FROM\s.*/g, "FROM #{@_config.getContainerFrom()}"
+    contents.replace /^FROM\s.*/g, "FROM #{@_config.getContainerImage()}"
 
   # Add ENV vars to buildfile contents
   _setEnv: (contents) ->

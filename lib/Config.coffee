@@ -5,9 +5,9 @@ class Config
     @_config = config
     @env = @_config.ENV.ENV || 'development'
 
-  getContainerFrom: ->
+  getContainerImage: ->
     # TODO: resolve semantic version and add version tag
-    @_config.container.from
+    @_config.container.image
 
   # Iterate over config collections.
   # Example: config.forEach('ENV', (k, v) ->)
