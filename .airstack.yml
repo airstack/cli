@@ -17,6 +17,8 @@
 #
 
 name: airstack-blog
+
+# ??? do we really need to override user ???
 user: airstack
 
 # Number of app containers to start
@@ -59,8 +61,11 @@ services:
 # Env vars to set on container start
 ENV:
   # App environment: development, testing, staging, production, etc.
-  # Overrideable as cli option
-  ENV: development
+  # Overrideable as cli option.
+  # Used to determine ~/.airstack/ mount paths and other core actions.
+  # Each base container should inspect APP_ENV on start up and set other
+  # env vars as needed; e.g. NODE_ENV, RACK_ENV, etc.
+  APP_ENV: development
 
   SOME_APP_ENV_STUFF: asdfasdfasdf
 
