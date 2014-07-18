@@ -4,6 +4,11 @@ class Config
   constructor: (config) ->
     @_config = config
     @env = @_config.ENV.ENV || 'development'
+    @_cache =
+      name_upper: @_config.name.toUpperCase()
+
+  getName: (upper) ->
+    upper && @_cache.name_upper || @_config.name
 
   getContainerImage: ->
     # TODO: resolve semantic version and add version tag

@@ -27,9 +27,16 @@ class Builder
 
   # Add ENV vars to buildfile contents
   _setEnv: (contents) ->
-    @_config.forEach 'ENV', (v, k) ->
+    # Set meta env vars
+    # https://github.com/airstack/docs/blob/master/README.md#environment-variables
+    env =
+      COMPONENT_NAME: @_config.getName(true)
+    envFunc = (v, k) ->
       contents += "ENV #{k} #{v}\n"
+    @_config.forEach 'ENV', envFunc
+    _.forIn env, envFunc
     contents
+
 
 
 module.exports = Builder
