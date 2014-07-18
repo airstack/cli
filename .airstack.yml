@@ -30,8 +30,12 @@ container:
   # Settings in .airship.yml will override any conflicting buildfile options
   build: ./Dockerfile
 
-# Directory to bind mount into the container
-source: ./
+# Directory to bind mount into the container.
+# Will be mounted in the base container user's home dir and
+# symlinked into /home/airstack. This allows the airstack user to ssh
+# into the container and see all the relevant mounts and data.
+mount:
+  - ./
 
 scripts:
   # Automatically run start scripts on `air up`
