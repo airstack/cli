@@ -1,10 +1,12 @@
 yaml = require 'js-yaml'
-fs   = require 'fs'
+fs = require 'fs'
+path = require 'path'
 
 class Parser
-  load: (fileName = '.airstack.yml', encoding = 'utf8') ->
-    file = fs.readFileSync fileName, encoding
-    yaml.safeLoad file
+  load: (file = '.airstack.yml', encoding = 'utf8') ->
+    file = path.normalize(file)
+    contents = fs.readFileSync file, encoding
+    yaml.safeLoad contents
 
 # singleton
 module.exports = new Parser
