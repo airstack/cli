@@ -1,27 +1,27 @@
 {
-  "name": "airship-cli",
+  "name": "airstack-cli",
   "version": "0.0.0",
-  "description": "Airship CLI",
-  "main": "bin/airship.js",
+  "description": "AirStack CLI",
+  "main": "bin/airstack.js",
   "bin": {
-    "airship": "bin/airship.js"
+    "air": "bin/airstack.js"
   },
   "scripts": {
     "test": "node test"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/airshipio/cli.git"
+    "url": "git://github.com/airstackio/cli.git"
   },
   "keywords": [
-    "airship"
+    "airstack"
   ],
   "author": "Joe Johnston <joe@simple10.com> (http://simple10.com/)",
   "license": "Apache 2.0",
   "bugs": {
-    "url": "https://github.com/airshipio/cli/issues"
+    "url": "https://github.com/airstackio/cli/issues"
   },
-  "homepage": "https://github.com/airshipio/cli",
+  "homepage": "https://github.com/airstackio/cli",
   "dependencies": {
     "cli": "^0.6.3"
   }

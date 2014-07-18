@@ -1,13 +1,13 @@
 # Overview
 
-Airship CLI is similar to [Heroku's toolbelt CLI](https://toolbelt.heroku.com/).
+AirStack CLI is similar to [Heroku's toolbelt CLI](https://toolbelt.heroku.com/).
 
 It provides a convenient method for fetching containers for dev, configuring and deploying.
 
 
 # Bechmark
 
-Airship CLI should be intuitive and easy to learn for junior developers and anyone new to Airship.
+AirStack CLI should be intuitive and easy to learn for junior developers and anyone new to AirStack.
 It should also be powerful enough to develop and manage an entire app cluster of 1,000 nodes.
 
 
@@ -37,13 +37,13 @@ For a Node CLI, node must already be installed.
 # Installation
 
 ```bash
-git clone git@github.com:airshipio/cli.git
+git clone git@github.com:airstackio/cli.git
 cd cli
 npm link
-airship up
+air up
 
 # Or
-airship -h
+air -h
 ```
 
 
