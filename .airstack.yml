@@ -40,9 +40,9 @@ mount:
 scripts:
   # Automatically run start scripts on `air up`
   start:
-    pre: git fetch
-    run: npm start
-    post: npm clean
+    before: echo 'before'
+    cmd: npm start
+    after: echo 'after'
   # OR
   # start: npm start
 
