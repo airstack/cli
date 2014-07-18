@@ -23,7 +23,8 @@
   },
   "homepage": "https://github.com/airstackio/cli",
   "dependencies": {
-    "cli": "^0.6.3"
+    "cli": "^0.6.3",
+    "js-yaml": "^3.1.0",
     "coffee-script": "^1.7.1"
   }
 }
