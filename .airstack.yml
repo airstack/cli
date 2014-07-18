@@ -1,42 +1,92 @@
 # Example .airstack.yml file
+#
+# Typically, the .airstack.yml file will reside in an app's root dir and be committed to git.
+# The config values below define the app cluster.
+#
+# An app cluster consists of:
+# - meta data about the app
+# - what base container to use for the app
+# - services to run in the app container; usually provided by the base container
+# - env vars to set in the app container
+# - components that make up the cluster: databases, workers, other services, etc.
+#
+# An app may optionally have a build file (Dockerfile or similar) that handles more
+# advanced container requirements not already provided by the base container. An example
+# is building a database container that requires downloading and compiling a tarball
+# and setting up special user permissions.
+#
 
 name: airstack-blog
 user: airstack
-container:
-  type: airstack/node
-  version: ^0.10
 
+# Number of app containers to start
+instances: 1
+
+# Container definition
+container:
+  from: airstack/node
+  version: ^0.10
+  # Optional build file
+  # Settings in .airship.yml will override any conflicting buildfile options
+  buildfile: ./Dockerfile
+
+# Directory to bind mount into the container
 source: ./
+
 scripts:
+  # Automatically run start scripts on `air up`
   start:
     pre: git fetch
     run: npm start
     post: npm clean
-  stop: ./stop.sh
-  restart: ./stop.sh && npm start
+  # OR
+  # start: npm start
 
-watch:
+  # Run on `air down`
+  stop: ./stop.sh
+
+# Health checks; WIP
+health:
   - path: /content
     script: restart
 
+# Services to enable on container start
 services:
   - sshd
   - rsyslog
   - newrelic
 
-
+# Env vars to set on container start
 ENV:
+  # App environment: development, testing, staging, production, etc.
+  # Overrideable as cli option
+  ENV: development
+
   SOME_APP_ENV_STUFF: asdfasdfasdf
 
-
+# Cluster components
+# Auto linked. Env vars from components are exported into the app container with the
+# prefix of the component name in caps: DB001_HOST=192.168.0.1, DB001_PORT=1234, ...
 components:
-  - name: db
+  # '&' defines an alias for use in duplicating blocks; it's a yaml thing
+  - &db
+    name: db001
     container:
-      type: airstack/mysql
+      type: airstack/mysql-cluster
       version: ^5.6
     ENV:
       ENGINE_TYPE: innodb
-  - name: worker
+
+  - # Example of using defaults and setting an explicit name
+    <<: *db
+    name: db002
+
+  - # Example of special component type that is a duplicate of the app container with modified settings.
+    # The name of the container in the docker registry will be airstack-blog__worker
+    name: worker
+    # Instance names will have appended sequence strings: 001, 002, etc.
+    # e.g. worker001, worker002, etc.
+    instances: 3
     user: worker
     source: ./worker
     scripts:
