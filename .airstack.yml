@@ -18,7 +18,6 @@
 
 name: airstack-blog
 
-
 # Number of app containers to start
 instances: 1
 
@@ -26,8 +25,9 @@ instances: 1
 container:
   image: airstack/node
   version: ^0.10
-  # Optional build file
-  # Settings in .airship.yml will override any conflicting buildfile options
+  # Optional build file or directory.
+  # If directory, files will be concatenated in order served by file system.
+  # Settings in .airship.yml will override any conflicting build options.
   build: ./Dockerfile
 
 # Directory to bind mount into the container.
