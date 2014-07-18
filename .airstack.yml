@@ -28,7 +28,7 @@ container:
   version: ^0.10
   # Optional build file
   # Settings in .airship.yml will override any conflicting buildfile options
-  buildfile: ./Dockerfile
+  build: ./Dockerfile
 
 # Directory to bind mount into the container
 source: ./

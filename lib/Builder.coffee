@@ -14,9 +14,10 @@ class Builder
       components: []
 
   buildfile: (file) ->
-    file = file || @_config.container.buildfile || @defaults.buildfile
-    file = path.normalize(file)
-    contents = fs.readFileSync file, @defaults.encoding
+    # TODO: add support for concatenating build dir, if dir given
+    build = file || @_config.container.build || @defaults.buildfile
+    build = path.normalize(build)
+    contents = fs.readFileSync build, @defaults.encoding
     contents = @_setFrom contents
     contents = @_setEnv contents
     console.log contents
