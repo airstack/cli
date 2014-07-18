@@ -18,8 +18,6 @@
 
 name: airstack-blog
 
-# ??? do we really need to override user ???
-user: airstack
 
 # Number of app containers to start
 instances: 1
