@@ -20,7 +20,12 @@ class Builder
     contents = fs.readFileSync build, @defaults.encoding
     contents = @_setFrom contents
     contents = @_setEnv contents
+
+    console.log "\n\n------------------\n# Dockerfile\n"
     console.log contents
+    console.log "------------------\n\n"
+
+    contents
 
   _setFrom: (contents) ->
     contents.replace /^FROM\s.*/g, "FROM #{@_config.getContainerImage()}"
