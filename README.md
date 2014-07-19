@@ -39,6 +39,7 @@ For a Node CLI, node must already be installed.
 ```bash
 git clone git@github.com:airstackio/cli.git
 cd cli
+npm install
 npm link
 air up
 
