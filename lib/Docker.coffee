@@ -9,7 +9,6 @@ docker = new Docker host: 'http://192.168.1.10', port: 3000
 
 
 class Docker
-  status: null
   cmd:
     start: ['boot2docker', ['up']]
     status: ['boot2docker', ['status']]
@@ -17,11 +16,12 @@ class Docker
 
   constructor: (dockerfile) ->
     @_dockerfile = dockerfile
+    @_state = null
 
   getDocker: ->
 
   isRunning: ->
-    @status == 'running'
+    @_state == 'running'
 
   init: (callback) ->
     # `boot2docker init`
@@ -36,7 +36,7 @@ class Docker
   status: (callback) ->
     @runBoot2DockerCmd @cmd.status,
       data: (data) =>
-        @status = "#{data}".trim()
+        @_state = "#{data}".trim()
       done: (code) ->
         callback()
 
