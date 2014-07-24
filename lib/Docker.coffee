@@ -13,18 +13,28 @@ class Docker
     start: ['boot2docker', ['up']]
     status: ['boot2docker', ['status']]
     ip: ['boot2docker', ['ip']]
+    info: ['boot2docker', ['info']]
 
   constructor: (dockerfile) ->
     @_dockerfile = dockerfile
     @_state = null
+    @_info = null
 
   getDocker: ->
 
   isRunning: ->
     @_state == 'running'
 
-  init: (callback) ->
-    # `boot2docker init`
+  info: (callback) ->
+    return callback @_info  if @_info
+    output = ''
+    @_runBoot2DockerCmd @cmd.info,
+      data: (data) ->
+        output += data
+      done: (code) =>
+        @_info = JSON.parse output.trim()
+        @_state = @_info.state
+        callback @_info if callback
 
   up: (callback) ->
     @status =>
