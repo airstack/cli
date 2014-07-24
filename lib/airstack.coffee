@@ -9,15 +9,19 @@ console.log "Command is: #{cli.command()}"
 
 try
   yml = parser.load '.airstack.yml'
-  config = new Config yml
-  console.log config
-  builder = new Builder config
-  dockerfile = builder.buildfile()
-  docker = new Docker dockerfile
-  docker.up ->
-    todo()
 catch e
+  console.log '[ERROR]'
   console.error e
+
+config = new Config yml
+console.log config
+builder = new Builder config
+dockerfile = builder.buildfile()
+vm = new VirtualMachine
+vm.info (info) ->
+  console.log '[INFO]'
+  console.log info
+  todo()
 
 
 
