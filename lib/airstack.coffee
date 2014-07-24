@@ -14,13 +14,18 @@ try
   builder = new Builder config
   dockerfile = builder.buildfile()
   docker = new Docker dockerfile
-
-  docker.init ->
-    console.log "\n\n\n-----------------------"
-    console.log "TODO:"
-    console.log "  - bundle Dockerfile into tar"
-    console.log "  - send tar to docker"
-    console.log "  - send cmd to docker"
-    console.log "  - use dockerops npm package???"
+  docker.up ->
+    todo()
 catch e
   console.error e
+
+
+
+todo = ->
+  console.log "\n\n\n-----------------------"
+  console.log "TODO:"
+  console.log "  - bundle Dockerfile into tar"
+  console.log "  - send tar to docker"
+  console.log "  - send cmd to docker"
+  console.log "  - use dockerops npm package???"
+
