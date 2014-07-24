@@ -23,7 +23,7 @@ instances: 1
 
 # Container definition
 container:
-  image: airstack/node
+  image: airstack/nodejs
   version: ^0.10
   # Optional build file or directory.
   # If directory, files will be concatenated in order served by file system.
@@ -48,7 +48,7 @@ scripts:
 
   # Run on `air down`
   stop: ./stop.sh
-  
+
   # Use namespaces to set environment specific scripts.
   # CLI will use namespace scripts then default to non-namespaced.
   production:
