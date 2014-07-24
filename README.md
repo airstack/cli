@@ -1,13 +1,13 @@
 # Overview
 
-AirStack CLI is similar to [Heroku's toolbelt CLI](https://toolbelt.heroku.com/).
+Airstack CLI is similar to [Heroku's toolbelt CLI](https://toolbelt.heroku.com/).
 
 It provides a convenient method for fetching containers for dev, configuring and deploying.
 
 
 # Bechmark
 
-AirStack CLI should be intuitive and easy to learn for junior developers and anyone new to AirStack.
+Airstack CLI should be intuitive and easy to learn for junior developers and anyone new to Airstack.
 It should also be powerful enough to develop and manage an entire app cluster of 1,000 nodes.
 
 

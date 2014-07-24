@@ -1,7 +1,7 @@
 {
   "name": "airstack-cli",
   "version": "0.0.0",
-  "description": "AirStack CLI",
+  "description": "Airstack CLI",
   "main": "bin/airstack.js",
   "bin": {
     "air": "bin/airstack.js"
