@@ -48,6 +48,13 @@ scripts:
 
   # Run on `air down`
   stop: ./stop.sh
+  
+  # Use namespaces to set environment specific scripts.
+  # CLI will use namespace scripts then default to non-namespaced.
+  production:
+    start:
+      # Override cmd for production environment
+      cmd: npm start --production
 
 # Health checks; WIP
 health:
