@@ -98,10 +98,6 @@ class Docker
     console.log '[STARTING VM]'
     console.log this
     @_runBoot2DockerCmd @cmd.start,
-      data: (data) ->
-        process.stdout.write data.toString()
-      error: (data) ->
-        process.stderr.write data.toString()
       done: (code) ->
         callback() if callback
 
