@@ -2,13 +2,11 @@
 # - use promises instead of callbacks
 # - use https://www.npmjs.org/package/dockops ???
 
-Docker = require 'dockerode'
 spawn = require('child_process').spawn
 
-docker = new Docker host: 'http://192.168.1.10', port: 3000
 
 
-class Docker
+class VirtualMachine
   cmd:
     start: ['boot2docker', ['up']]
     status: ['boot2docker', ['status']]
@@ -112,4 +110,4 @@ class Docker
         callback() if callback
 
 
-module.exports = Docker
+module.exports = VirtualMachine
