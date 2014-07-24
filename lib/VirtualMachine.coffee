@@ -56,15 +56,6 @@ class VirtualMachine
         @_ip = if m then m[0] else null
         callback @_ip
 
-  build: (tarfile, imageName, callback) ->
-    # todo !!!!
-    # ...... WHEN I GET BACK ......
-    # 1. manually tar a Dockerfile
-    # 2. send tarfile to dockerode to see if it works
-    #    via the serialfile???
-    # 3. get tar-async working
-    # 4. write code to output init scripts and add them to Dockerfile
-
   upgrade: (callback) ->
     # http://docs.docker.com/installation/mac/
     # https://github.com/boot2docker/osx-installer/releases
