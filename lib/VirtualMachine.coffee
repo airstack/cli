@@ -13,12 +13,9 @@ class VirtualMachine
     ip: ['boot2docker', ['ip']]
     info: ['boot2docker', ['info']]
 
-  constructor: (dockerfile) ->
-    @_dockerfile = dockerfile
+  constructor: ->
     @_state = null
     @_info = null
-
-  getDocker: ->
 
   isRunning: ->
     @_state == 'running'

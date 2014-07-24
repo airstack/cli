@@ -2,7 +2,7 @@ cli = require './Cli'
 parser = require './Parser'
 Config = require './Config'
 Builder = require './Builder'
-Docker = require './Docker'
+VirtualMachine = require './VirtualMachine'
 
 
 console.log "Command is: #{cli.command()}"
