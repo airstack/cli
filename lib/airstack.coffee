@@ -72,11 +72,12 @@ class Airstack
     dockerfile = builder.buildfile()
     bundler = new Bundler
     bundler.append 'Dockerfile', dockerfile, null, =>
-      bundler.close()
-      @_build bundler.tarFile
+      bundler.close =>
+        @_build bundler.tarFile
 
   _build: (tarFile) ->
-    @docker.build tarFile, @config.getName(), (error, stream) ->
+    imageName = @config.getName()
+    @docker.build tarFile, imageName, (error, stream) ->
       return console.error error  if error
       stream.on 'error', (data) ->
         error = data.toString()
