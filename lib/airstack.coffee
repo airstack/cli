@@ -12,6 +12,7 @@ Config = require './Config'
 Builder = require './Builder'
 VirtualMachine = require './VirtualMachine'
 Docker = require './Docker'
+Bundler = require './Bundler'
 
 
 class Airstack
@@ -21,6 +22,8 @@ class Airstack
   ip: null
   # Airstack config instance
   config: null
+  # Dockerode instance
+  docker: null
 
   constructor: ->
     @vm = new VirtualMachine
@@ -37,7 +40,7 @@ class Airstack
 
   up: (opts) ->
     @loadYaml()
-    @initVM =>
+    @initDocker =>
       @build 'testimage'
 
   loadYaml: (filename = '.airstack.yml') ->
@@ -52,7 +55,7 @@ class Airstack
     console.log @config
     @config
 
-  initVM: (callback) ->
+  initDocker: (callback) ->
     @vm.info (info) =>
       @info = info
       console.log '[INFO]'
@@ -60,15 +63,20 @@ class Airstack
       @vm.up =>
         @vm.ip (ip) =>
           @ip = ip
+          @docker = new Docker host: "http://#{@ip}", port: @info.DockerPort
           callback()
 
-  # Must be called after initVM
-  build: (imageName) ->
-    imageName = 'testbuild'
+  # Must be called after initDocker
+  build: ->
     builder = new Builder @config
     dockerfile = builder.buildfile()
-    docker = new Docker host: "http://#{@ip}", port: @info.DockerPort
-    docker.build './defaults/test.tar', imageName, (error, stream) ->
+    bundler = new Bundler
+    bundler.append 'Dockerfile', dockerfile, null, =>
+      bundler.close()
+      @_build bundler.tarFile
+
+  _build: (tarFile) ->
+    @docker.build tarFile, @config.getName(), (error, stream) ->
       return console.error error  if error
       stream.on 'error', (data) ->
         error = data.toString()
