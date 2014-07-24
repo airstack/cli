@@ -1,4 +1,6 @@
 #! /usr/bin/env node
 
 require('coffee-script/register');
-require('../lib/airstack');
+Airstack = require('../lib/Airstack');
+
+new Airstack

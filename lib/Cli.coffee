@@ -14,5 +14,11 @@ class Cli
   command: ->
     cli.command
 
+  opts: ->
+    {
+      args: cli.args
+      options: cli.options
+    }
+
 # singleton
 module.exports = new Cli
