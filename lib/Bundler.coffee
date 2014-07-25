@@ -18,7 +18,7 @@ class Bundler
   close: (callback) ->
     @tape.once 'end', ->
       # HACK: tar-async.close does not close the stream in time
-      setTimeout callback, 1
+      setTimeout callback, 100
     @tape.close()
 
 module.exports = Bundler
