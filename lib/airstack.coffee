@@ -38,10 +38,16 @@ class Airstack
       when 'down' then @down opts
       else cli.help()
 
+  # load .airstack.yml
+  # make sure docker is ready; start boot2docker if needed
+  # bundle Dockerfile, init scripts, and any other files into tar
+  # send tar to Docker API build
+  # send run cmd to Docker API
+  # echo out ip address and port of app container
   up: (opts) ->
     @loadYaml()
     @initDocker =>
-      @build 'testimage'
+      @build()
 
   loadYaml: (filename = '.airstack.yml') ->
     return @config  if @config
