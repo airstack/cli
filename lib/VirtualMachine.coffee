@@ -29,6 +29,8 @@ class VirtualMachine
       done: (code) =>
         @_info = JSON.parse output.trim()
         @_state = @_info.state
+        console.log "\n\n[INFO]"
+        console.log @_info
         callback @_info if callback
 
   up: (callback) ->
@@ -91,8 +93,7 @@ class VirtualMachine
       callbacks.done code  if callbacks.done
 
   _startVM: (callback) ->
-    console.log '[STARTING VM]'
-    console.log this
+    console.log "\n\n[STARTING VM]"
     @_runBoot2DockerCmd @cmd.start,
       done: (code) ->
         callback() if callback

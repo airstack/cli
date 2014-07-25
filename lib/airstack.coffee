@@ -1,7 +1,7 @@
 # todo !!!!
 # xx1. manually tar a Dockerfile
 # xx2. send tarfile to dockerode to see if it works
-# 3. get tar-async working
+# xx3. get tar-async working
 # 4. write code to output init scripts and add them to Dockerfile
 # 5. convert callbacks to promises
 
@@ -58,8 +58,6 @@ class Airstack
   initDocker: (callback) ->
     @vm.info (info) =>
       @info = info
-      console.log '[INFO]'
-      console.log @info
       @vm.up =>
         @vm.ip (ip) =>
           @ip = ip
