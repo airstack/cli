@@ -3,9 +3,13 @@ path = require 'path'
 os = require 'os'
 
 class Utils
-  # Create nested directories as needed
-  # Same as `mkdir -p`
-  @mkdir: (dir, mode) ->
+
+  ###*
+  Synchronously create specified directory.
+
+  Creates parent directories as needed. Same as `mkdir -p`
+  ###
+  @mkdirSync: (dir, mode) ->
     dir = path.resolve dir
     if typeof mode == 'undefined'
       mode = 0o777 & (~process.umask())
@@ -14,10 +18,11 @@ class Utils
         throw new Error "#{dir} exists and is not a directory"
     catch err
       if err.code == 'ENOENT'
-        @mkdir path.dirname(dir), mode
+        @mkdirSync path.dirname(dir), mode
         fs.mkdirSync dir, mode
       else
         throw err
+
 
   ###*
   Get random string of specified length.
