@@ -1,3 +1,14 @@
+# TODO
+
+- write install script
+  - download node v0.11 into ~/.airstack/bin/node
+  - http://nodejs.org/dist/
+  - use nvm install as template: https://github.com/creationix/nvm/blob/master/install.sh
+- rewrite cli code using Promises and generators
+  - http://blogs.atlassian.com/2013/11/harmony-generators-and-promises-for-node-js-async-fun-and-profit/
+
+
+
 # Overview
 
 Airstack CLI is similar to [Heroku's toolbelt CLI](https://toolbelt.heroku.com/).
