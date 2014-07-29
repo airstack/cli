@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+# Airstack CLI install script
+# WIP!!!
+
+# Reference: https://raw.githubusercontent.com/wayneeseguin/rvm/master/binscripts/rvm-installer
+
+
+# Install samba
+brew install samba
+
+# Install boot2docker
+
+# Install node v0.11.13+
