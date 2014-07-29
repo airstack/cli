@@ -25,7 +25,7 @@ class Utils
 
 
   ###*
-  Get random string of specified length.
+  Get random string.
   ###
   @randomString: (length, chars = '0123456789abcdefghiklmnopqrstuvwxyz') ->
     charsLen = chars.length

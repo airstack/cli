@@ -14,7 +14,6 @@ describe 'Utils', ->
         Utils.randomString 5
       dir = path.join.apply null, subdirs
       dir = path.join path.dirname(Utils.randomTmpFile 'a'), dir
-      console.log dir
       Utils.mkdirSync dir, mode
       expect( fs.existsSync dir ).to.equal true
       expect( fs.statSync(dir).mode & 0o777 ).to.equal mode
