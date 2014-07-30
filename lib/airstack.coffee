@@ -7,8 +7,8 @@
 
 
 cli = require './Cli'
-parser = require './Parser'
-Config = require './Config'
+Parser = require './Parser'
+config = require './Config'
 Builder = require './Builder'
 VirtualMachine = require './VirtualMachine'
 Docker = require './Docker'
@@ -45,42 +45,42 @@ class Airstack
   # send run cmd to Docker API
   # echo out ip address and port of app container
   up: (opts) ->
-    @loadYaml()
-    @initDocker =>
-      @build()
-
-  loadYaml: (filename = '.airstack.yml') ->
-    return @config  if @config
-    try
-      yml = parser.load filename
-    catch e
-      console.log '[ERROR]'
-      console.error e.message
-      return false
-    @config = new Config yml
-    console.log @config
-    @config
+    Parser.loadYaml '.airstack.yml'
+    .then (yaml) =>
+      config.init yaml
+    .then =>
+      @initDocker =>
+        @build()
 
   initDocker: (callback) ->
     @vm.info (info) =>
       @info = info
       @vm.up =>
         @vm.ip (ip) =>
+          console.log ip
           @ip = ip
           @docker = new Docker host: "http://#{@ip}", port: @info.DockerPort
           callback()
 
   # Must be called after initDocker
   build: ->
-    builder = new Builder @config
+    builder = new Builder
     dockerfile = builder.buildfile()
+
+    console.log "\n\n------------------\n# Dockerfile\n"
+    console.log dockerfile
+    console.log "------------------"
+
     bundler = new Bundler
+    console.log "\n\nBundling tar file..."
+    console.log bundler.getFile()
+    console.log "\n\n"
     bundler.append 'Dockerfile', dockerfile, null, =>
       bundler.close =>
-        @_build bundler.tarFile
+        @_build bundler.getFile()
 
   _build: (tarFile) ->
-    imageName = @config.getName()
+    imageName = config.getName()
     @docker.build tarFile, imageName, (error, stream) ->
       return console.error error  if error
       stream.on 'error', (data) ->

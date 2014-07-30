@@ -4,17 +4,22 @@
 
 fs = require 'fs'
 Tar = require 'tar-async'
+config = require './Config'
 Utils = require './Utils'
 path = require 'path'
 
 class Bundler
   defaults:
-    out: './.airstack/tmp/docker.tar'
+    tarFile: 'docker.tar'
 
-  constructor: (tarFile = @defaults.out) ->
-    @_tarFile = tarFile
+  # todo: refactor with promises instead of sync mkdir
+  constructor: (tarFile = @defaults.tarFile) ->
+    @_tarFile = path.join config.getTmpDir(), tarFile
     Utils.mkdirSync path.dirname @_tarFile
     @_tape = new Tar output: fs.createWriteStream @_tarFile
+
+  getFile: ->
+    @_tarFile
 
   append: (filename, contents, opts, callback) ->
     @_tape.append filename, contents, opts, callback
