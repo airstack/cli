@@ -1,15 +1,28 @@
 fs = require 'fs'
 path = require 'path'
 os = require 'os'
+_ = require 'lodash'
 
-class Utils
+
+Utils =
+  _tmpDir: path.join os.tmpdir(), '.airstack'
+
+  ###*
+  _.defaults with deep merge.
+
+  @param {object} options
+  @param {object} defaults
+
+  Values from defaults are copied into options if not set in options.
+  ###
+  defaults: _.partialRight(_.merge, _.defaults)
 
   ###*
   Synchronously create specified directory.
 
   Creates parent directories as needed. Same as `mkdir -p`
   ###
-  @mkdirSync: (dir, mode) ->
+  mkdirSync: (dir, mode) ->
     dir = path.resolve dir
     if typeof mode == 'undefined'
       mode = 0o777 & (~process.umask())
@@ -27,7 +40,7 @@ class Utils
   ###*
   Get random string.
   ###
-  @randomString: (length, chars = '0123456789abcdefghiklmnopqrstuvwxyz') ->
+  randomString: (length, chars = '0123456789abcdefghiklmnopqrstuvwxyz') ->
     charsLen = chars.length
     (for i in [1..length]
       chars.substr Math.floor(Math.random() * charsLen), 1
@@ -35,19 +48,28 @@ class Utils
 
 
   ###*
-  Get a randome file name in the OS's tmp dir.
+  Get a random file name in the OS's tmp dir.
 
   Does not guarantee uniqueness.
   ###
-  @randomTmpFile: (filename) ->
+  randomTmpFile: (filename) ->
+    filename = @randomString 10  unless filename
+    path.join os.tmpdir(), @randomTmpDir(), filename
+
+
+  ###*
+  Get random dir in OS's tmp dir.
+
+  Does not guarantee uniqueness.
+  ###
+  randomTmpDir: ->
     dir = [
       'tmp-'
       process.pid
       '-'
       (Math.random() * 0x1000000000).toString 36
     ].join ''
-    filename = @randomString 10  unless filename
-    path.join os.tmpdir(), dir, filename
+    path.join @_tmpDir, dir, Utils.randomString 5
 
 
 module.exports = Utils

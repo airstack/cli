@@ -7,6 +7,28 @@ fs = require 'fs'
 
 describe 'Utils', ->
 
+  describe '#defaults', ->
+    it 'does deep merge', ->
+      defaults =
+        a:
+          aa: 1
+          ab: 2
+        b: true
+        d: 111
+      opts =
+        a:
+          aa: -1
+          ac: -2
+        c: false
+        d: 222
+      Utils.defaults opts, defaults
+      expect( opts.a.aa ).to.equal -1
+      expect( opts.a.ab ).to.equal 2
+      expect( opts.a.ac ).to.equal -2
+      expect( opts.b ).to.be.true
+      expect( opts.c ).to.be.false
+      expect( opts.d ).to.equal 222
+
   describe '#mkdirSync', ->
     it 'creates parent directories', ->
       mode = 0o754
@@ -40,4 +62,14 @@ describe 'Utils', ->
       filename = 'SOME_SPECIFIC_FILENAME'
       file = Utils.randomTmpFile filename
       expect( path.basename file ).to.equal filename
+
+  describe '#randomTmpDir', ->
+    it 'is in OS tmp dir', ->
+      dir = Utils.randomTmpDir()
+      tmpdir = os.tmpdir()
+      expect( tmpdir.length ).to.be.above 2
+      expect( dir.substr 0, tmpdir.length ).to.equal tmpdir
+
+
+
 
