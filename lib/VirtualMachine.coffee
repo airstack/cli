@@ -2,6 +2,12 @@
 # - use promises instead of callbacks
 # - use https://www.npmjs.org/package/dockops ???
 
+###
+# Use this to get the vm process to query for memory
+VBoxManage list runningvms
+VM_UUID=$(VBoxManage list runningvms | grep boot2docker | cut -d ' ' -f 2 | sed 's/[{}]//g')
+###
+
 spawn = require('child_process').spawn
 
 
