@@ -1,6 +1,7 @@
 config = require '../lib/Config'
 Utils = require '../lib/Utils'
 expect = require('./helpers/Common').expect
+os = require 'os'
 
 
 describe 'Config', ->
@@ -41,3 +42,9 @@ describe 'Config', ->
       expect( file ).to.equal config._defaults.container.build
       expect( encoding ).to.equal config._defaults.container.encoding
 
+  describe '.getTmpDir', ->
+    it 'is in OS tmp dir', ->
+      dir = config.getTmpDir()
+      tmpdir = os.tmpdir()
+      expect( tmpdir.length ).to.be.above 2
+      expect( dir.substr 0, tmpdir.length ).to.equal tmpdir
