@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/airstackio/cli",
   "dependencies": {
+    "bluebird": "^2.2.2",
     "cli": "^0.6.3",
     "coffee-script": "^1.7.1",
     "dockerode": "^2.0.1",

@@ -1,16 +1,18 @@
 yaml = require 'js-yaml'
-fs = require 'fs'
+Promise = require 'bluebird'
+readFile = Promise.promisify require('fs').readFile
 path = require 'path'
 
 
-class Parser
+Parser =
   defaults:
     encoding: 'utf8'
 
-  load: (file, encoding = @defaults.encoding) ->
-    file = path.normalize(file)
-    contents = fs.readFileSync file, encoding
-    yaml.safeLoad contents
+  loadYaml: (file, encoding) ->
+    @_loadFile(file, encoding).then (contents) ->
+      yaml.safeLoad contents
 
-# singleton
-module.exports = new Parser
+  _loadFile: (file, encoding = @defaults.encoding) ->
+    readFile path.normalize(file), encoding
+
+module.exports = Parser
