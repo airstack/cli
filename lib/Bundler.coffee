@@ -26,15 +26,19 @@ class Bundler
     .then =>
       @_tape = new Tar output: fs.createWriteStream @_tarFile
 
-  append: (filename, contents, opts, callback) ->
+  append: (filename, contents, opts) ->
     @init()
     .then =>
-      @_tape.append filename, contents, opts, callback
+      @_tape.append filename, contents, opts, (ret) ->
+        Promise.resolve ret
 
-  close: (callback) ->
-    @_tape.once 'end', ->
-      # HACK: tar-async.close does not close the stream in time
-      setTimeout callback, 100
-    @_tape.close()
+  close: ->
+    new Promise (resolve, reject) =>
+      @_tape.once 'end', ->
+        # HACK: tar-async.close does not close the stream in time
+        setTimeout ->
+          resolve true
+        , 100
+      @_tape.close()
 
 module.exports = Bundler

@@ -75,9 +75,11 @@ class Airstack
     console.log "\n\nBundling tar file..."
     console.log bundler.getFile()
     console.log "\n\n"
-    bundler.append 'Dockerfile', dockerfile, null, =>
-      bundler.close =>
-        @_build bundler.getFile()
+    bundler.append 'Dockerfile', dockerfile
+    .then ->
+      bundler.close()
+    .then =>
+      @_build bundler.getFile()
 
   _build: (tarFile) ->
     imageName = config.getName()
