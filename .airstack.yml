@@ -28,7 +28,8 @@ container:
   # Optional build file or directory.
   # If directory, files will be concatenated in order served by file system.
   # Settings in .airship.yml will override any conflicting build options.
-  build: ./Dockerfile
+  build: ./defaults/Dockerfile
+  encoding: utf8
 
 # Directory to bind mount into the container.
 # Will be mounted in the base container user's home dir and
