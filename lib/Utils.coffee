@@ -1,4 +1,5 @@
-fs = require 'fs'
+Promise = require 'bluebird'
+fs = Promise.promisifyAll require('fs')
 path = require 'path'
 os = require 'os'
 _ = require 'lodash'
@@ -18,21 +19,25 @@ Utils =
   defaults: _.partialRight(_.merge, _.defaults)
 
   ###*
-  Synchronously create specified directory.
+  Create specified directory.
 
-  Creates parent directories as needed. Same as `mkdir -p`
+  Creates parent directories as needed. Same as `mkdir -p`.
+  @return {promise}
   ###
-  mkdirSync: (dir, mode) ->
+  mkdir: (dir, mode) ->
     dir = path.resolve dir
-    if typeof mode == 'undefined'
+    if _.isUndefined mode
       mode = 0o777 & (~process.umask())
-    try
-      unless fs.statSync(dir).isDirectory()
-        throw new Error "#{dir} exists and is not a directory"
-    catch err
-      if err.code == 'ENOENT'
-        @mkdirSync path.dirname(dir), mode
-        fs.mkdirSync dir, mode
+    fs.statAsync dir
+    .then (stat) ->
+      unless stat.isDirectory()
+        throw "#{dir} exists and is not a directory"
+      stat
+    .catch (err) =>
+      if err.cause.code is 'ENOENT'
+        @mkdir path.dirname(dir), mode
+        .then ->
+          fs.mkdirAsync dir, mode
       else
         throw err
 

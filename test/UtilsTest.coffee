@@ -29,16 +29,18 @@ describe 'Utils', ->
       expect( opts.c ).to.be.false
       expect( opts.d ).to.equal 222
 
-  describe '#mkdirSync', ->
-    it 'creates parent directories', ->
+  describe '#mkdir', ->
+    it 'creates parent directories', (done) ->
       mode = 0o754
       subdirs = for i in [1..5]
         Utils.randomString 5
       dir = path.join.apply null, subdirs
       dir = path.join path.dirname(Utils.randomTmpFile 'a'), dir
-      Utils.mkdirSync dir, mode
-      expect( fs.existsSync dir ).to.equal true
-      expect( fs.statSync(dir).mode & 0o777 ).to.equal mode
+      Utils.mkdir dir, mode
+      .then ->
+        expect( fs.existsSync dir ).to.equal true
+        expect( fs.statSync(dir).mode & 0o777 ).to.equal mode
+        done()
 
   describe '#randomString', ->
     it 'returns the correct string length', ->
