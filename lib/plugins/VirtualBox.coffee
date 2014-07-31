@@ -1,6 +1,4 @@
-# TODO:
-# - use promises instead of callbacks
-# - use https://www.npmjs.org/package/dockops ???
+# use https://www.npmjs.org/package/dockops ???
 
 ###
 # Use this to get the vm process to query for memory
@@ -66,7 +64,7 @@ class VirtualBox
       m = data.match /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/
       @_ip = m and m[0] or null
 
-  upgrade: (callback) ->
+  upgrade: ->
     # http://docs.docker.com/installation/mac/
     # https://github.com/boot2docker/osx-installer/releases
     # THIS PROCESS UPGRADES THE boot2docker.iso but not the tools. WTF?
@@ -90,7 +88,6 @@ class VirtualBox
     if @isRunning()
       @_runBoot2DockerCmd cmd, streams
     else
-      log.info '<<<<<<<< runBoot start'
       @_startVM()
       .then =>
         @_runBoot2DockerCmd cmd, streams

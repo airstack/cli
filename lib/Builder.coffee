@@ -1,4 +1,6 @@
 config = require './Config'
+Promise = require 'bluebird'
+readFile = Promise.promisify require('fs').readFile
 fs = require 'fs'
 path = require 'path'
 _ = require 'lodash'
@@ -6,14 +8,13 @@ _ = require 'lodash'
 class Builder
 
   buildfile: (file, encoding = 'utf8') ->
-    # TODO: add support for concatenating build dir, if dir given
     unless file
       [file, encoding] = config.getBuildFile()
-    # TODO: use promises
-    contents = fs.readFileSync path.normalize(file), encoding
-    contents = @_setFrom contents
-    contents = @_setEnv contents
-    contents
+    readFile path.normalize(file), encoding
+    .then (contents) =>
+      contents = @_setFrom contents
+      contents = @_setEnv contents
+      contents
 
   _setFrom: (contents) ->
     contents.replace /^FROM\s.*/g, "FROM #{config.getContainerImage()}"

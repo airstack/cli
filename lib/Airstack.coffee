@@ -1,11 +1,3 @@
-# todo !!!!
-# xx1. manually tar a Dockerfile
-# xx2. send tarfile to dockerode to see if it works
-# xx3. get tar-async working
-# 4. write code to output init scripts and add them to Dockerfile
-# 5. convert callbacks to promises
-
-
 cli = require './Cli'
 Parser = require './Parser'
 config = require './Config'
@@ -57,41 +49,16 @@ class Airstack
   build: ->
     @docker ?= new Docker host: "http://#{@vm.getIP()}", port: @vm.getDockerPort()
     builder = new Builder
-    dockerfile = builder.buildfile()
-
-    console.log "\n\n------------------\n# Dockerfile\n"
-    console.log dockerfile
-    console.log "------------------"
-
     bundler = new Bundler
-    console.log "\n\nBundling tar file..."
-    console.log bundler.getFile()
-    console.log "\n\n"
-    bundler.append 'Dockerfile', dockerfile
+    builder.buildfile()
+    .then (dockerfile) =>
+      log.debug '[Dockerfile]'.bold, "\n#{dockerfile}"
+      log.debug '[Docker.tar]'.bold, bundler.getFile()
+      bundler.append 'Dockerfile', dockerfile
     .then ->
       bundler.close()
     .then =>
-      @_build bundler.getFile()
-
-  _build: (tarFile) ->
-    imageName = config.getName()
-    @docker.build tarFile, imageName, (error, stream) ->
-      return console.error error  if error
-      stream.on 'error', (data) ->
-        error = data.toString()
-        process.stderr.write "[ERROR] #{error}"
-      stream.on 'data', (data) ->
-        data = JSON.parse(data)
-        if data.error
-          error = data
-          console.log "\n[ERROR]"
-          console.log data
-        else
-          for k, v of data
-            tab = if k == 'status' then '  ' else ''
-            process.stdout.write "#{tab}#{v.toString()}"
-      stream.on 'end', ->
-        console.log "Built image: #{imageName}" unless error
+      @docker.build bundler.getFile(), config.getName()
 
 
 module.exports = Airstack
