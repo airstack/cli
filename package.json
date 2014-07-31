@@ -30,7 +30,8 @@
     "js-yaml": "^3.1.0",
     "lodash": "^2.4.1",
     "pm2": "^0.9.2",
-    "tar-async": "^1.2.0"
+    "tar-async": "^1.2.0",
+    "winston": "^0.7.3"
   },
   "devDependencies": {
     "chai": "^1.9.1",
