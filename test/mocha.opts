@@ -3,3 +3,4 @@
 --reporter nyan
 --compilers coffee:coffee-script/register
 --harmony
+--recursive
