@@ -11,11 +11,10 @@ class Logger
   Logger: @constructor
 
   # Enable logs for levels <= level
-  level: 1 # debug
+  level: 'debug'
 
-  # npm style levels
   levels:
-    silly: 0
+    trace: 0
     debug: 1
     verbose: 2
     data: 2
@@ -24,43 +23,48 @@ class Logger
     error: 5
 
   colors:
-    silly: 'magenta'
+    trace: 'magenta'
     verbose: 'cyan'
     data: 'grey'
     debug: 'blue'
     info: 'green'
-    warn: 'yellow'
+    warn: 'white'
     error: 'red'
 
   constructor: ->
     @log = new winston.Logger
       levels: @levels
+      colors: @colors
       transports: [
-        new  winston.transports.Console
+        new winston.transports.Console
+          level: @level
+          prettyPrint: true
+          colorize: true
+          silent: false
+          timestamp: false
       ]
-    @log.cli()
-    winston.addColors @colors
 
   setLevel: (level) ->
-    @level = @levels[level]
+    @level = level
+    @log.transports.console.level = level
 
   debug: ->
-    @log.info.apply null, arguments  if @level <= @levels['debug']
+    @log.debug.apply null, arguments
 
   data: ->
-    @log.data.apply null, arguments  if @level <= @levels['data']
+    @log.data.apply null, arguments
 
   info: ->
-    @log.info.apply null, arguments  if @level <= @levels['info']
+    @log.info.apply null, arguments
 
   warn: ->
-    @log.warn.apply null, arguments  if @level <= @levels['warn']
+    @log.warn.apply null, arguments
 
   error: ->
-    @log.error.apply null, arguments  if @level <= @levels['error']
+    @log.error.apply null, arguments
 
   log: ->
-    @log.log.apply null, arguments  if @level <= @levels[arguments[0]]
+    @log.log.apply null, arguments
 
 # singleton
 module.exports = new Logger
