@@ -10,9 +10,10 @@ cli = require './Cli'
 Parser = require './Parser'
 config = require './Config'
 Builder = require './Builder'
-VirtualMachine = require './VirtualMachine'
+VM = require './plugins/VirtualBox'
 Docker = require './Docker'
 Bundler = require './Bundler'
+log = require './Logger'
 
 
 class Airstack
@@ -26,12 +27,12 @@ class Airstack
   docker: null
 
   constructor: ->
-    @vm = new VirtualMachine
+    @vm = new VM
     cmd = cli.command()
     @runCmd cmd  if cmd
 
   runCmd: (cmd) ->
-    console.log "Command is: #{cmd}"
+    log.info "Command is: #{cmd}"
     opts = cli.opts()
     switch cmd
       when 'up' then @up opts
@@ -46,24 +47,15 @@ class Airstack
   # echo out ip address and port of app container
   up: (opts) ->
     Parser.loadYaml '.airstack.yml'
-    .then (yaml) =>
+    .then (yaml) ->
       config.init yaml
     .then =>
-      @initDocker =>
-        @build()
+      @vm.up()
+    .then =>
+      @build()
 
-  initDocker: (callback) ->
-    @vm.info (info) =>
-      @info = info
-      @vm.up =>
-        @vm.ip (ip) =>
-          console.log ip
-          @ip = ip
-          @docker = new Docker host: "http://#{@ip}", port: @info.DockerPort
-          callback()
-
-  # Must be called after initDocker
   build: ->
+    @docker ?= new Docker host: "http://#{@vm.getIP()}", port: @vm.getDockerPort()
     builder = new Builder
     dockerfile = builder.buildfile()
 
