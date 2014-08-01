@@ -7,7 +7,7 @@ VM_UUID=$(VBoxManage list runningvms | grep boot2docker | cut -d ' ' -f 2 | sed 
 ###
 
 spawn = require('child_process').spawn
-log = require '../Logger'
+log = require '../lib/Logger'
 _ = require 'lodash'
 
 

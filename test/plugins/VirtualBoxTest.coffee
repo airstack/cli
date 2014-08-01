@@ -1,4 +1,4 @@
-VirtualBox = require '../../lib/plugins/VirtualBox'
+VirtualBox = require '../../plugins/VirtualBox'
 expect = require('../helpers/Common').expect
 
 # TODO: speed up tests with mocks
