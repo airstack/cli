@@ -36,14 +36,18 @@ class VirtualBox
 
   info: ->
     return Promise.resolve @_info  if @_info
-    @_runBoot2DockerCmd @cmd.info
-    .then (data) =>
-      @_info = JSON.parse data.trim()
-      log.debug 'boot2docker info'.bold, @_info
-      @_state = @_info.State
-      @_info
-    .then =>
+    # Get info and ip, return info
+    Promise.all [
+      @_runBoot2DockerCmd @cmd.info
+        .then (data) =>
+          @_info = JSON.parse data.trim()
+          log.debug 'boot2docker info'.bold, @_info
+          @_state = @_info.State
+          @_info
       @ip()
+    ]
+    .then =>
+      @_info
 
   up: ->
     @info()
