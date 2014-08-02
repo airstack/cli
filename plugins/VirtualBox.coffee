@@ -121,15 +121,17 @@ class VirtualBox
 
   _startVM: ->
     @_runBoot2DockerCmd @cmd.start,
-      # `boot2docker up` sends output to stderr; WTF?
       error: @intercept
     .then =>
       @info()
 
+  # Redirect output to log.debug
+  # Use with _runBoot2DockerCmd streams
   intercept: (msg) ->
     log.debug msg.toString()
     ''
 
+  # Use with _runBoot2DockerCmd streams to suppress output
   ignore: (msg) ->
     ''
 
