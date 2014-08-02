@@ -52,10 +52,7 @@ class VirtualBox
   up: ->
     @info()
     .then =>
-      return true  if @isRunning()
-      @_startVM()
-      .then =>
-        @info()
+      @_startVM()  unless @isRunning()
 
   status: ->
     @info()
@@ -127,6 +124,8 @@ class VirtualBox
     @_runBoot2DockerCmd @cmd.start,
       # `boot2docker up` sends output to stderr; WTF?
       error: @intercept
+    .then =>
+      @info()
 
   intercept: (msg) ->
     log.debug msg.toString()
