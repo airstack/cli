@@ -61,7 +61,7 @@ class VirtualBox
 
   ip: ->
     return Promise.resolve @_ip  if @_ip
-    @runBoot2DockerCmd @cmd.ip,
+    @_runBoot2DockerCmd @cmd.ip,
       error: @ignore
     .then (data) =>
       m = data.match /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/
