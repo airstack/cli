@@ -6,12 +6,13 @@ VBoxManage list runningvms
 VM_UUID=$(VBoxManage list runningvms | grep boot2docker | cut -d ' ' -f 2 | sed 's/[{}]//g')
 ###
 
+VirtualMachine = require '../lib/VirtualMachine'
 spawn = require('child_process').spawn
 log = require '../lib/Logger'
 _ = require 'lodash'
 
 
-class VirtualBox
+class VirtualBox extends VirtualMachine
   cmd:
     start: ['boot2docker', ['up']]
     ip: ['boot2docker', ['ip']]
@@ -25,26 +26,30 @@ class VirtualBox
   isRunning: ->
     @_state == 'running'
 
-  getIP: ->
-    @_ip
-
   getState: ->
     @_info.State
+
+  getDockerIP: ->
+    @_ip
 
   getDockerPort: ->
     @_info.DockerPort
 
   info: ->
-    return Promise.resolve @_info  if @_info
+    return Promise.resolve @_info  if @_info and @_ip
     # Get info and ip, return info
     Promise.all [
-      @_runBoot2DockerCmd @cmd.info
+      @_runBoot2DockerCmd @cmd.info, data: @_streams.silent
         .then (data) =>
           @_info = JSON.parse data.trim()
-          log.debug 'boot2docker info'.bold, @_info
+          log.debug 'info:'.bold, @_info
           @_state = @_info.State
           @_info
-      @ip()
+          return Promise.resolve @_ip  if @_ip
+      @_runBoot2DockerCmd @cmd.ip, data: @_streams.silent, error: @_streams.ignore
+        .then (data) =>
+          log.debug 'ip:'.bold, data
+          @_ip = data or null
     ]
     .then =>
       @_info
@@ -59,13 +64,6 @@ class VirtualBox
     .then =>
       @getState()
 
-  ip: ->
-    return Promise.resolve @_ip  if @_ip
-    @_runBoot2DockerCmd @cmd.ip,
-      error: @ignore
-    .then (data) =>
-      @_ip = data or null
-
   upgrade: ->
     # http://docs.docker.com/installation/mac/
     # https://github.com/boot2docker/osx-installer/releases
@@ -78,14 +76,6 @@ class VirtualBox
     # OR FOR SAFETY ...
     # `boot2docker delete && boot2docker init`
 
-  cmdToString: (cmd) ->
-    if _.isString cmd
-      cmd
-    else if _.isArray cmd
-      "#{cmd[0]} #{(cmd[1] || []).join ' '}"
-    else
-      cmd.toString()
-
   runBoot2DockerCmd: (cmd, streams) ->
     if @isRunning()
       @_runBoot2DockerCmd cmd, streams
@@ -95,44 +85,56 @@ class VirtualBox
         @_runBoot2DockerCmd cmd, streams
 
   _runBoot2DockerCmd: (cmd, streams = {}) ->
+    debug = (msg) ->
+      log.debug msg.toString()
+      msg
     _.defaults streams,
-      data: (msg) ->
-        log.debug msg.toString()
-        msg
-      error: (msg) ->
-        log.error msg.toString()
-        msg
+      data: debug
+      error: debug
     _data = ''
     _error = ''
-    cmdStr = @cmdToString cmd
+    cmdStr = @_cmdToString cmd
     new Promise (resolve, reject) ->
-      log.debug '[ RUN  ]'.bold, cmdStr
+      log.debug '[ RUN  ]'.grey, cmdStr
       proc = spawn.apply null, cmd
       proc.stdout.on 'data', (data) ->
         _data += streams.data data
       proc.stderr.on 'data', (data) ->
         _error += streams.error data
       proc.on 'exit', (code) ->
-        log.debug '[ DONE ]'.bold, cmdStr, ' :: ', code, ' :: ', if _error then 'with error output' else 'no error output'
-        if _error
+        log.debug '[ DONE ]'.grey, cmdStr, '=>', code
+        if code is not 0
           reject _error, code, _data
         else
           resolve _data, code, _error
 
+  _cmdToString: (cmd) ->
+    if _.isString cmd
+      cmd
+    else if _.isArray cmd
+      "#{cmd[0]} #{(cmd[1] || []).join ' '}"
+    else
+      cmd.toString()
+
   _startVM: ->
     @_runBoot2DockerCmd @cmd.start,
-      error: @intercept
+      # Redirect error output to show progress in realtime
+      error: @_streams.intercept
     .then =>
       @info()
 
-  # Redirect output to log.debug
-  # Use with _runBoot2DockerCmd streams
-  intercept: (msg) ->
-    log.debug msg.toString()
-    ''
 
-  # Use with _runBoot2DockerCmd streams to suppress output
-  ignore: (msg) ->
-    ''
+  # Use with _runBoot2DockerCmd streams to handle output
+  _streams:
+    # Redirect output to log.debug
+    intercept: (msg) ->
+      process.stderr.out msg.toString()
+      ''
+    # Discard output
+    ignore: (msg) ->
+      ''
+    # Suppress debug output
+    silent: (msg) ->
+      msg
 
 module.exports = VirtualBox
