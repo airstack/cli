@@ -64,8 +64,7 @@ class VirtualBox
     @_runBoot2DockerCmd @cmd.ip,
       error: @ignore
     .then (data) =>
-      m = data.match /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/
-      @_ip = m and m[0] or null
+      @_ip = data or null
 
   upgrade: ->
     # http://docs.docker.com/installation/mac/
