@@ -128,7 +128,7 @@ class VirtualBox extends VirtualMachine
   _streams:
     # Redirect output to log.debug
     intercept: (msg) ->
-      process.stderr.out msg.toString()
+      process.stderr.write msg.toString()
       ''
     # Discard output
     ignore: (msg) ->
