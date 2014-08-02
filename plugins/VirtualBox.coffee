@@ -14,7 +14,6 @@ _ = require 'lodash'
 class VirtualBox
   cmd:
     start: ['boot2docker', ['up']]
-    status: ['boot2docker', ['status']]
     ip: ['boot2docker', ['ip']]
     info: ['boot2docker', ['info']]
 
@@ -28,6 +27,9 @@ class VirtualBox
 
   getIP: ->
     @_ip
+
+  getState: ->
+    @_info.State
 
   getDockerPort: ->
     @_info.DockerPort
@@ -52,9 +54,9 @@ class VirtualBox
         @info()
 
   status: ->
-    @_runBoot2DockerCmd @cmd.status
-    .then (data) =>
-      @_state = "#{data}".trim()
+    @info()
+    .then =>
+      @getState()
 
   ip: ->
     return Promise.resolve @_ip  if @_ip
