@@ -5,6 +5,7 @@ Parser = require './Parser'
 Commands = require './Commands'
 VirtualMachine = require './VirtualMachine'
 Promise = require 'bluebird'
+charm = require('charm')(process)
 
 
 class Airstack
@@ -19,6 +20,8 @@ class Airstack
     ]
     .then =>
       @run cmd
+    .then =>
+      @watch()  if cmd is 'up'
 
   loadConfig: ->
     Parser.loadYaml @configFile
@@ -32,6 +35,24 @@ class Airstack
       when 'up' then @cmd.up opts
       when 'down' then @cmd.down opts
       else cli.help()
+
+  watch: ->
+    charm.removeAllListeners '^C'
+    charm.on '^C', ->
+      # charm.display 'reset'
+      clearInterval @_watchInterval
+      charm.reset()
+      process.exit()
+    # Clear the screen while keeping log data after exit
+    str = for i in [1..process.stdout.rows]
+      "\n"
+    charm.write str.join ''
+    charm.reset()
+    @_watchInterval = setInterval @status.bind(@), 1000
+
+  status: ->
+    @i ?= 0
+    log.debug @i++
 
   createVM: ->
     # todo: parse config/<platform>.yml to get vm
