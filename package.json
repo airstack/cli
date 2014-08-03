@@ -26,6 +26,7 @@
     "bluebird": "^2.2.2",
     "charm": "^0.2.0",
     "cli": "^0.6.3",
+    "cli-table": "^0.3.0",
     "coffee-script": "^1.7.1",
     "dockerode": "^2.0.1",
     "js-yaml": "^3.1.0",

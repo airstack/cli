@@ -6,6 +6,7 @@ Commands = require './Commands'
 VirtualMachine = require './VirtualMachine'
 Promise = require 'bluebird'
 charm = require('charm')(process)
+StatusTable = require './StatusTable'
 
 
 class Airstack
@@ -49,10 +50,19 @@ class Airstack
     charm.write str.join ''
     charm.reset()
     @_watchInterval = setInterval @status.bind(@), 1000
+    @status()
 
   status: ->
+    @_statusTable ?= new StatusTable
     @i ?= 0
-    log.debug @i++
+    data = for i in [1..10]
+      obj = {}
+      obj["key_#{i}"] = for j in [1..8]
+        @i + j
+      obj
+    charm.position 0, 0
+    charm.write @_statusTable.render data
+    @i++
 
   createVM: ->
     # todo: parse config/<platform>.yml to get vm
