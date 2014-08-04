@@ -35,6 +35,7 @@ class Commands
 
   build: ->
     @docker ?= new Docker host: "http://#{@vm.getDockerIP()}", port: @vm.getDockerPort()
+    throw 'Invalid Docker address'  unless @vm.getDockerIP() and @vm.getDockerPort()
     builder = new Builder
     bundler = new Bundler
     builder.buildfile()
