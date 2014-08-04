@@ -34,10 +34,11 @@ class Commands
       @build()
 
   build: ->
-    @docker ?= new Docker host: "http://#{@vm.getDockerIP()}", port: @vm.getDockerPort()
     throw 'Invalid Docker address'  unless @vm.getDockerIP() and @vm.getDockerPort()
+    docker = new Docker host: "http://#{@vm.getDockerIP()}", port: @vm.getDockerPort()
     builder = new Builder
     bundler = new Bundler
+    dockerURL = "http://#{@vm.getDockerIP()}:#{@vm.getDockerPort()}"
     builder.buildfile()
     .then (dockerfile) =>
       log.debug 'Dockerfile:'.bold, "\n#{dockerfile}"
@@ -45,9 +46,9 @@ class Commands
       bundler.append 'Dockerfile', dockerfile
     .then ->
       bundler.close()
-    .then =>
-      log.debug "Sending Docker.tar:".grey, "http://#{@vm.getDockerIP()}:#{@vm.getDockerPort()}"
-      @docker.build bundler.getFile(), config.getName()
+    .then ->
+      log.debug "Sending Docker.tar:".grey, dockerURL
+      docker.build bundler.getFile(), config.getName()
 
 
 module.exports = Commands
