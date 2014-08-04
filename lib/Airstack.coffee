@@ -11,6 +11,7 @@ StatusTable = require './StatusTable'
 
 class Airstack
   configFile: '.airstack.yml'
+  updateStatsInterval: 1500
 
   constructor: ->
     cmd = cli.command()
@@ -40,7 +41,6 @@ class Airstack
   watch: ->
     charm.removeAllListeners '^C'
     charm.on '^C', ->
-      # charm.display 'reset'
       clearInterval @_watchInterval
       charm.reset()
       process.exit()
@@ -48,20 +48,24 @@ class Airstack
     str = for i in [1..process.stdout.rows]
       "\n"
     charm.write str.join ''
-    charm.reset()
+    charm.position 0, 0
     @_watchInterval = setInterval @status.bind(@), 1000
     @status()
+    @_updateStats()
 
   status: ->
     @_statusTable ?= new StatusTable
     @i ?= 0
-    data = for i in [1..10]
+    data = for i in [1..5]
       obj = {}
       obj["key_#{i}"] = for j in [1..8]
         @i + j
       obj
+    data.push
+      boot2docker: ['', '', '', @vm.getState() or '', @vm.getDockerIP() or '', @vm.getDockerPort() or '', '', '']
     charm.position 0, 0
     charm.write @_statusTable.render data
+    charm.write "\n"
     @i++
 
   createVM: ->
@@ -69,5 +73,9 @@ class Airstack
     log.debug 'Using VirtualBox'
     @vm = VirtualMachine.factory 'VirtualBox'
 
+  _updateStats: ->
+    @vm.info()
+    .then =>
+      setTimeout @_updateStats.bind(@), @updateStatsInterval
 
 module.exports = new Airstack
