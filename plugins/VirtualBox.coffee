@@ -36,20 +36,25 @@ class VirtualBox extends VirtualMachine
     @_info.DockerPort
 
   info: ->
-    return Promise.resolve @_info  if @_info and @_ip
     # Get info and ip, return info
     Promise.all [
-      @_runBoot2DockerCmd @cmd.info, data: @_streams.silent
-        .then (data) =>
-          @_info = JSON.parse data.trim()
+      @_runBoot2DockerCmd @cmd.info #, data: @_streams.silent
+        .then (data, error, code) =>
+          try
+            @_info = JSON.parse "#{data}".trim()
+          catch e
+            @_info = {}
           log.debug 'info:'.bold, @_info
           @_state = @_info.State
           @_info
-          return Promise.resolve @_ip  if @_ip
+        .catch (e) =>
+          @_info = {}
       @_runBoot2DockerCmd @cmd.ip, data: @_streams.silent, error: @_streams.ignore
         .then (data) =>
           log.debug 'ip:'.bold, data
           @_ip = data or null
+        .catch (e) =>
+          @_ip = null
     ]
     .then =>
       @_info
