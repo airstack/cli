@@ -46,7 +46,7 @@ Node >=0.11.10 is required.
 
 **OSX**: [install package](http://docs.docker.com/installation/mac/)
 
-**Linux: [manual install](https://github.com/boot2docker/boot2docker#installation)
+**Linux**: [manual install](https://github.com/boot2docker/boot2docker#installation)
 
 Linux requires VirtualBox for now. Native support will be added once
 OSX CLI is stable.
