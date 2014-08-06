@@ -1,5 +1,4 @@
 ```bash
-
      \    _)             |                 |
     _ \    |   __|  __|  __|   _` |   __|  |  /
    ___ \   |  |   \__ \  |    (   |  (       <
@@ -13,8 +12,6 @@
   - download node v0.11 into ~/.airstack/bin/node
   - http://nodejs.org/dist/
   - use nvm install as template: https://github.com/creationix/nvm/blob/master/install.sh
-- rewrite cli code using Promises and generators
-  - http://blogs.atlassian.com/2013/11/harmony-generators-and-promises-for-node-js-async-fun-and-profit/
 
 
 
@@ -36,22 +33,52 @@ It should also be powerful enough to develop and manage an entire app cluster of
 For MVP, the CLI focuses on the NodeJS community.
 
 
-# Pain Points
-
-### Dependencies
-
-In NodeJS, module dependency management is a pain. NPM does a decent job of fetching and updating dependencies,
-but that's it. There's no equivalent to Bundler's Gemfile.lock in Ruby which when used properly ensures
-identical gems are used across dev boxes and production.
-
-
 # Requirements
 
-For a Node CLI, node must already be installed.
+### NodeJS
 
-* All: [Official Downloads](http://nodejs.org/download/)
-* OSX: [Homebrew](http://brew.sh/): `brew install node`
-* Virtual: [Nave](https://github.com/isaacs/nave) or [NVM](https://github.com/creationix/nvm)
+#### OSX
+
+* [Homebrew](http://brew.sh/): `brew install node`
+* or [NVM](https://github.com/creationix/nvm)
+
+#### Linux
+
+* [Download](http://nodejs.org/download/)
+
+
+### boot2docker
+
+#### OSX
+
+* [install package](http://docs.docker.com/installation/mac/)
+
+#### Linux
+
+Linux requires VirtualBox for now. Native support will be added once
+OSX CLI is stable.
+
+* [manual install](https://github.com/boot2docker/boot2docker#installation)
+
+
+### airstack images
+
+The CLI expects Docker images to already be available in the VM.
+Normally, the CLI would download the images as needed from the Airstack
+Docker index. Until the index is stable, simply clone the images repo
+and manually build each image.
+
+```bash
+# Make sure boot2docker is first running
+boot2docker up
+
+# Clone repo and make images
+git clone git@github.com:airstack/airstack.git
+cd airstack/base
+make build
+cd ../nodejs
+make build
+```
 
 
 # Installation
@@ -61,6 +88,8 @@ git clone git@github.com:airstackio/cli.git
 cd cli
 npm install
 npm link
+
+# Test
 air up
 
 # Or
@@ -71,4 +100,5 @@ air -h
 # Resources
 
 * [Creating a CLI in Node](http://michaelbrooks.ca/deck/jsconf2013/)
-*
+
+
