@@ -37,24 +37,19 @@ For MVP, the CLI focuses on the NodeJS community.
 
 ### NodeJS
 
-**OSX**
-* [Homebrew](http://brew.sh/): `brew install node`
-* or [NVM](https://github.com/creationix/nvm)
+Node >=0.11.10 is required.
 
-**Linux**
-* [Download](http://nodejs.org/download/)
-
+1. Install [NVM](https://github.com/creationix/nvm)
+2. `nvm use 0.11`
 
 ### boot2docker
 
-**OSX**
-* [install package](http://docs.docker.com/installation/mac/)
+**OSX**: [install package](http://docs.docker.com/installation/mac/)
 
-**Linux**
+**Linux: [manual install](https://github.com/boot2docker/boot2docker#installation)
+
 Linux requires VirtualBox for now. Native support will be added once
 OSX CLI is stable.
-
-* [manual install](https://github.com/boot2docker/boot2docker#installation)
 
 
 ### Airstack Images
