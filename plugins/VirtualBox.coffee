@@ -37,6 +37,8 @@ class VirtualBox extends VirtualMachine
 
   info: ->
     # Get info and ip, return info
+    # todo: use cancellable and timeout
+    # @runBoot2DockerCmd @cmd.info, data: ->, error: ->, timeout: 1000
     Promise.all [
       @_runBoot2DockerCmd @cmd.info #, data: @_streams.silent
         .then (data, error, code) =>
@@ -81,37 +83,39 @@ class VirtualBox extends VirtualMachine
     # OR FOR SAFETY ...
     # `boot2docker delete && boot2docker init`
 
-  runBoot2DockerCmd: (cmd, streams) ->
+  runBoot2DockerCmd: (cmd, opts) ->
     if @isRunning()
-      @_runBoot2DockerCmd cmd, streams
+      @_runBoot2DockerCmd cmd, opts
     else
       @_startVM()
       .then =>
-        @_runBoot2DockerCmd cmd, streams
+        @_runBoot2DockerCmd cmd, opts
 
-  _runBoot2DockerCmd: (cmd, streams = {}) ->
-    debug = (msg) ->
+  _runBoot2DockerCmd: (cmd, opts = {}) ->
+    debug = (type, msg) ->
       log.debug msg.toString()
       msg
-    _.defaults streams,
-      data: debug
-      error: debug
+    _.defaults opts,
+      data: debug.bind null, '[stdout]'.grey
+      error: debug.bind null, '[stderr]'.grey
+      timeout: null
     _data = ''
     _error = ''
     cmdStr = @_cmdToString cmd
+    # todo: use cancellable and timeout
     new Promise (resolve, reject) ->
       log.debug '[ RUN  ]'.grey, cmdStr
       proc = spawn.apply null, cmd
       proc.stdout.on 'data', (data) ->
-        _data += streams.data data
+        _data += opts.data data
       proc.stderr.on 'data', (data) ->
-        _error += streams.error data
+        _error += opts.error data
       proc.on 'exit', (code) ->
         log.debug '[ DONE ]'.grey, cmdStr, '=>', code
-        if code is not 0
-          reject _error, code, _data
+        if code is 0
+          resolve _data, _error, code
         else
-          resolve _data, code, _error
+          reject _error, _data, code
 
   _cmdToString: (cmd) ->
     if _.isString cmd
