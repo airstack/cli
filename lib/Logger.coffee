@@ -32,7 +32,7 @@ class Logger
     error: 'red'
 
   constructor: ->
-    @log = new winston.Logger
+    @logger = new winston.Logger
       levels: @levels
       colors: @colors
       transports: [
@@ -44,27 +44,28 @@ class Logger
           timestamp: false
       ]
 
+
   setLevel: (level) ->
     @level = level
-    @log.transports.console.level = level
+    @logger.transports.console.level = level
 
   debug: ->
-    @log.debug.apply null, arguments
+    @logger.debug.apply @logger, arguments
 
   data: ->
-    @log.data.apply null, arguments
+    @logger.data.apply @logger, arguments
 
   info: ->
-    @log.info.apply null, arguments
+    @logger.info.apply @logger, arguments
 
   warn: ->
-    @log.warn.apply null, arguments
+    @logger.warn.apply @logger, arguments
 
   error: ->
-    @log.error.apply null, arguments
+    @logger.debug.apply @logger, arguments
 
-  log: ->
-    @log.log.apply null, arguments
+  log: (level) ->
+    @logger.log.apply @logger, arguments
 
 # singleton
 module.exports = new Logger
