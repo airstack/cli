@@ -41,13 +41,13 @@ class Commands
     dockerURL = "http://#{@vm.getDockerIP()}:#{@vm.getDockerPort()}"
     builder.buildfile()
     .then (dockerfile) =>
-      log.debug 'Dockerfile:'.bold, "\n#{dockerfile}"
+      log.debug 'Dockerfile:'.bold, "\n", dockerfile
       log.debug 'Docker.tar:'.grey, bundler.getFile()
       bundler.append 'Dockerfile', dockerfile
     .then ->
       bundler.close()
     .then ->
-      log.debug "Sending Docker.tar:".grey, dockerURL
+      log.debug 'Sending Docker.tar:'.grey, dockerURL
       docker.build bundler.getFile(), config.getName()
 
 

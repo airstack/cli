@@ -29,7 +29,7 @@ class Docker
             log.error error
             reject error
           else
-            log.info "Built image: #{imageName}"
+            log.info 'Built image:', imageName
             resolve()
 
 

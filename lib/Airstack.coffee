@@ -70,7 +70,7 @@ class Airstack
 
   createVM: ->
     # todo: parse config/<platform>.yml to get vm
-    log.debug 'Using VirtualBox'
+    log.debug 'Using VirtualBox'.grey
     @vm = VirtualMachine.factory 'VirtualBox'
 
   _updateStats: ->
