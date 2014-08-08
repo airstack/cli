@@ -107,3 +107,9 @@ components:
     scripts:
       start: npm run --worker
 
+
+paths:
+  base: ~/.airstack/
+  tmp: tmp
+  log: log
+  data: data

@@ -3,7 +3,8 @@ os = require 'os'
 path = require 'path'
 _ = require 'lodash'
 
-
+# HOMEPATH and USERPROFILE are win32
+HOMEDIR = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE
 
 
 class Config
@@ -16,16 +17,21 @@ class Config
     components: []
     ENV:
       APP_ENV: 'development'
-    tmpDir: null
+    # Paths are relative to paths.base or absolute
+    paths:
+      base: path.join HOMEDIR, '.airstack'
+      tmp: Utils.randomTmpDir()
+      log: 'log'
+      data: 'data'
 
   constructor: ->
-    @_defaults.tmpDir = Utils.randomTmpDir()
     @_config = @_defaults
 
   init: (config = {}) ->
     clone = _.cloneDeep config
     Utils.defaults clone, @_defaults
     @_config = clone
+    @normalizePaths()
 
   reset: ->
     @_config = @_defaults
@@ -47,7 +53,18 @@ class Config
     @_config.container.image
 
   getTmpDir: ->
-    @_config.tmpDir
+    path.resolve @_config.paths.base, @_config.paths.tmp
+
+  getLogDir: (app = '') ->
+    path.resolve @_config.paths.base, @_config.paths.log, app
+
+  getDataDir: (app = '') ->
+    path.resolve @_config.paths.base, @_config.paths.data, app
+
+  normalizePaths: ->
+    base = @_config.paths.base
+    if base[0] is '~'
+      @_config.paths.base = path.join HOMEDIR, base.slice(1)
 
   # Iterate over config collections.
   # Example: config.forEach('ENV', (k, v) ->)
