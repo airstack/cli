@@ -8,6 +8,14 @@
 
 # TODO
 
+- Write generic process monitor module
+  - See lib/ProcessMonitor.coffee
+
+- Samba conf
+
+
+
+
 - write install script
   - download node v0.11 into ~/.airstack/bin/node
   - http://nodejs.org/dist/
@@ -42,7 +50,7 @@ Node >=0.11.10 is required.
 1. Install [NVM](https://github.com/creationix/nvm)
 2. `nvm use 0.11`
 
-### boot2docker
+### Boot2Docker
 
 **OSX**: [install package](http://docs.docker.com/installation/mac/)
 
@@ -51,6 +59,11 @@ Node >=0.11.10 is required.
 Linux requires VirtualBox for now. Native support will be added once
 OSX CLI is stable.
 
+### Samba
+
+OSX: `brew install samba`
+
+See [samba doc](https://github.com/airstack/docs/blob/master/samba.md).
 
 ### Airstack Images
 
