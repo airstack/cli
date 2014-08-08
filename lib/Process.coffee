@@ -21,7 +21,7 @@ class Process
   _cmd: null
   _args: []
   _opts: {}
-  _detached: true
+  _detached: false
 
   _process: null
   _pid: null
