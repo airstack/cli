@@ -62,7 +62,7 @@ class Logger
     @logger.warn.apply @logger, arguments
 
   error: ->
-    @logger.debug.apply @logger, arguments
+    @logger.error.apply @logger, arguments
 
   log: (level) ->
     @logger.log.apply @logger, arguments
