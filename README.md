@@ -18,6 +18,11 @@
   - ssh into containers
 - Web dashboard
   - ???
+- CLI commands
+  - `air ssh <container>`
+  - `air down`
+  - `air restart <container>`
+  - tab completion for container names
 - Install script
   - download node v0.11 into ~/.airstack/bin/node
   - http://nodejs.org/dist/
