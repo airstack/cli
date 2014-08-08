@@ -3,9 +3,10 @@
 # If the process command starts a daemon, call #lookupPid after
 # calling #start to ensure the correct pid is obtained.
 
+Promise = require 'bluebird'
 path = require 'path'
 spawn = require('child_process').spawn
-Promise = require 'bluebird'
+exec = Promise.promisify require('child_process').exec
 fsOpen = Promise.promisify require('fs').open
 config = require './Config'
 Utils = require './Utils'
@@ -83,18 +84,13 @@ class Process
     # `pgrep -o -f '@toString()'`
     # todo: use `ps` then filter results to find pid of running process
     # https://github.com/neekey/ps/blob/master/lib/index.js
-    ps = spawn 'pgrep', ['-o', '-f', @_fullCmd]
-    pid = null
-    new Promise (resolve, reject) =>
-      ps.stdout.on 'data', (data) ->
-        pid = parseInt data
-      ps.stderr.on 'data', (data) ->
-        log.error '[pgrep]'.grey, data.toString()
-      ps.on 'close', (code) ->
-        if code is 0 or code is 1
-          resolve pid
-        else
-          reject 'pgrep failed'
+    exec "pgrep -o -f #{@_fullCmd}", timeout: 100
+    .spread (stdout, stderr) ->
+      parseInt stdout
+    .catch (err) ->
+      unless err.cause.code is 1
+        log.error '[pgrep]'.grey, err
+        Promise.reject err
 
   status: ->
     # todo: implement by querying ps and getting cpu, mem, etc.
