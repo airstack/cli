@@ -40,10 +40,14 @@ class Airstack
 
   watch: ->
     charm.removeAllListeners '^C'
-    charm.on '^C', ->
+    charm.on '^C', =>
       clearInterval @_watchInterval
       charm.reset()
-      process.exit()
+      # todo: move cmd.cleanup to own function and listen for process exit
+      # currently cmd.clienup will not be executed if user ^c quickly on air up
+      @cmd.cleanup()
+      .then ->
+        process.exit()
     # Clear the screen while keeping log data after exit
     str = for i in [1..process.stdout.rows]
       "\n"
