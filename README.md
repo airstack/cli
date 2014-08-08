@@ -8,15 +8,17 @@
 
 # TODO
 
-- Write generic process monitor module
-  - See lib/ProcessMonitor.coffee
-
-- Samba conf
-
-
-
-
-- write install script
+- Samba
+  - add mounts to samba conf
+  - reload samba on conf chang
+- CLI dashboard
+  - output status of host processes: samba, virtualbox, etc.
+  - keyboard support for switching between monitor and log view
+  - status of containers
+  - ssh into containers
+- Web dashboard
+  - ???
+- Install script
   - download node v0.11 into ~/.airstack/bin/node
   - http://nodejs.org/dist/
   - use nvm install as template: https://github.com/creationix/nvm/blob/master/install.sh
