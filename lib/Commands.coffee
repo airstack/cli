@@ -4,6 +4,7 @@ Docker = require './Docker'
 Bundler = require './Bundler'
 log = require './Logger'
 Promise = require 'bluebird'
+Samba = require '../plugins/Samba'
 
 
 class Commands
@@ -18,6 +19,7 @@ class Commands
 
   constructor: (opts) ->
     @vm = opts.vm
+    @samba = new Samba
 
   # load .airstack.yml
   # make sure docker is ready; start boot2docker if needed
@@ -27,7 +29,7 @@ class Commands
   # echo out ip address and port of app container
   up: (opts) ->
     Promise.all [
-      # @samba.up()
+      @samba.up()
       @vm.up()
     ]
     .then =>
@@ -50,6 +52,8 @@ class Commands
       log.debug 'Sending Docker.tar:'.grey, dockerURL
       docker.build bundler.getFile(), config.getName()
 
+  cleanup: ->
+    @samba.kill()
 
 module.exports = Commands
 
