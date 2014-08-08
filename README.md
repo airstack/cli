@@ -15,7 +15,6 @@
   - output status of host processes: samba, virtualbox, etc.
   - keyboard support for switching between monitor and log view
   - status of containers
-  - ssh into containers
 - Web dashboard
   - ???
 - CLI commands
