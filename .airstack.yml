@@ -110,7 +110,10 @@ components:
 
 paths:
   base: ~/.airstack/
-  # Leave tmp commented out to use OS tmp dir
-  # tmp: tmp
   log: log
   data: data
+  # Leave tmp commented out to use OS tmp dir
+  # tmp: tmp
+  # Do not change config.
+  # config: config
+
