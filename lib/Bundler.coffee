@@ -11,10 +11,10 @@ path = require 'path'
 
 class Bundler
   defaults:
-    tarFile: 'docker.tar'
+    tarFile: "docker_#{(new Date).getTime()}_#{Utils.randomString 5}.tar"
 
-  constructor: (tarFile = @defaults.tarFile) ->
-    @_tarFile = path.join config.getTmpDir(), tarFile
+  constructor: ->
+    @_tarFile = path.join config.getTmpDir(), @defaults.tarFile
     @_tape = null
 
   getFile: ->
