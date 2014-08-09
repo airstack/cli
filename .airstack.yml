@@ -110,6 +110,7 @@ components:
 
 paths:
   base: ~/.airstack/
-  tmp: tmp
+  # Leave tmp commented out to use OS tmp dir
+  # tmp: tmp
   log: log
   data: data
