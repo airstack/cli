@@ -8,6 +8,7 @@ path = require 'path'
 spawn = require('child_process').spawn
 exec = Promise.promisify require('child_process').exec
 fsOpen = Promise.promisify require('fs').open
+fsExists = Promise.promisify require('fs').exists
 config = require './Config'
 Utils = require './Utils'
 log = require './Logger'
@@ -22,12 +23,14 @@ class Process
   _args: []
   _opts: {}
   _detached: false
+  _configFile: null
 
   _process: null
   _pid: null
   _logFiles:
     stdout: null
     stderr: null
+  _initialized: false
 
   stdout: null
   stderr: null
@@ -41,6 +44,15 @@ class Process
   pid: ->
     @_pid
 
+  # Override in subclass as needed.
+  # Every method that returns a Promise should first call init.
+  init: ->
+    return Promise.resolve()  if @_initialized
+    @initConfig()
+    .then @initLogs.bind @
+    .then =>
+      @_initialized = true
+
   # Run process.
   # @param {String} cmd   Command to start
   # @param {Object} opts  Options
@@ -49,7 +61,7 @@ class Process
   # @return Promise
   start: ->
     log.info "[#{@_cmd}]".grey, 'starting'
-    @initLogs()
+    @init()
     .then =>
       if @_detached
         @_opts.detached = true
@@ -62,12 +74,13 @@ class Process
       @_process = child
 
   up: ->
-    @attach()
+    @init()
+    .then @attach.bind @
     .then (pid) =>
       @start()  unless pid
 
   attach: ->
-    @initLogs()
+    @init()
     .then @lookupPid.bind @
     .then (pid) =>
       if pid
@@ -84,7 +97,9 @@ class Process
     # `pgrep -o -f '@toString()'`
     # todo: use `ps` then filter results to find pid of running process
     # https://github.com/neekey/ps/blob/master/lib/index.js
-    exec "pgrep -o -f #{@_fullCmd}", timeout: 100
+    @init()
+    .then =>
+      exec "pgrep -o -f #{@_fullCmd}", timeout: 100
     .spread (stdout, stderr) ->
       parseInt stdout
     .catch (err) ->
@@ -94,14 +109,15 @@ class Process
 
   status: ->
     # todo: implement by querying ps and getting cpu, mem, etc.
+    @init()
 
   kill: (signal = 'SIGTERM') ->
     log.info "[#{@_cmd}]".grey, 'stopping'
-    new Promise (resolve, reject) =>
+    @init()
+    .then =>
       pid = @_process and @_process.pid or @_pid
       throw { code: 'ESRCH', errno: 'ESRCH', syscall: 'kill' }  unless pid
       process.kill pid, signal
-      resolve()
     .catch (err) =>
       # Rethrow unless error was due nonexistent process
       if err.code is 'ESRCH'
@@ -111,6 +127,24 @@ class Process
 
   reload: ->
     throw 'Process#reload must be implemented in subclass.'
+
+  # Initialize config file if @configFile is present.
+  initConfig: ->
+    return Promise.resolve()  unless @_configFile
+    # Copy default config file from cli/config/* if config is not present
+    conf = config.getConfigFile @_configFile
+    fsExists conf
+    .then (configExists) =>
+      return true  if configExists
+      src = path.join __dirname, '../config', @_configFile
+      log.debug '[ init ]'.grey, "Copying #{src} to #{conf}"
+      Utils.mkdir config.getConfigDir()
+      .then ->
+        exec "cp #{src} #{conf}", timeout: 100
+      .spread (stdout, stderr) ->
+        log.debug stderr  if stderr
+    .then =>
+      @_configFile = conf
 
   # todo: add log rotation or truncation somewhere
   # http://stackoverflow.com/questions/11403953/winston-how-to-rotate-logs
