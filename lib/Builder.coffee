@@ -9,7 +9,7 @@ class Builder
 
   buildfile: (file, encoding = 'utf8') ->
     unless file
-      [file, encoding] = config.getBuildFile()
+      {file, encoding} = config.getBuildFile()
     readFile path.normalize(file), encoding
     .then (contents) =>
       contents = @_setFrom contents

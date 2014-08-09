@@ -40,10 +40,12 @@ class Config
     @_config.name
 
   getBuildFile: ->
-    [
-      @_config.container.build
-      @_config.container.encoding
-    ]
+    {
+      file: @_config.container.build
+      encoding: @_config.container.encoding
+      toString: ->
+        @file
+    }
 
   getENV: ->
     @_config.ENV.APP_ENV
