@@ -2,6 +2,7 @@ config = require '../lib/Config'
 Utils = require '../lib/Utils'
 expect = require('./helpers/Common').expect
 os = require 'os'
+path = require 'path'
 
 
 describe 'Config', ->
@@ -43,8 +44,17 @@ describe 'Config', ->
       expect( encoding ).to.equal config._defaults.container.encoding
 
   describe '.getTmpDir', ->
-    it 'is in OS tmp dir', ->
+    it 'is in OS tmp dir when not specified in paths', ->
       dir = config.getTmpDir()
       tmpdir = os.tmpdir()
       expect( tmpdir.length ).to.be.above 2
       expect( dir.substr 0, tmpdir.length ).to.equal tmpdir
+
+    it 'uses paths.tmp when specified', ->
+      config.init paths:
+        base: './.airstack'
+        tmp: 'tmp'
+      dir = config.getTmpDir()
+      tmpdir = os.tmpdir()
+      expect( dir.substr 0, tmpdir.length ).to.not.equal tmpdir
+      expect( dir ).to.equal path.join process.cwd(), './.airstack/tmp'
