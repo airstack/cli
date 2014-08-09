@@ -41,6 +41,13 @@ Utils =
       else
         throw err
 
+  ###*
+  fs.exists with Promise support.
+  ###
+  exists: (path) ->
+    new Promise (resolve, reject) ->
+      fs.exists path, resolve
+
 
   ###*
   Get random string.

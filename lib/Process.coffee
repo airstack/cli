@@ -8,10 +8,11 @@ path = require 'path'
 spawn = require('child_process').spawn
 exec = Promise.promisify require('child_process').exec
 fsOpen = Promise.promisify require('fs').open
-fsExists = Promise.promisify require('fs').exists
 config = require './Config'
 Utils = require './Utils'
 log = require './Logger'
+
+
 
 
 class Process
@@ -133,7 +134,7 @@ class Process
     return Promise.resolve()  unless @_configFile
     # Copy default config file from cli/config/* if config is not present
     conf = config.getConfigFile @_configFile
-    fsExists conf
+    Utils.exists conf
     .then (configExists) =>
       return true  if configExists
       src = path.join __dirname, '../config', @_configFile
