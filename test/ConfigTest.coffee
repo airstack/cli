@@ -33,13 +33,13 @@ describe 'Config', ->
           build: '/some/path/to/Dockerfile'
           encoding: 'ascii'
       config.init opts
-      [file, encoding] = config.getBuildFile()
+      {file, encoding} = config.getBuildFile()
       expect( file ).to.equal opts.container.build
       expect( encoding ).to.equal opts.container.encoding
 
     it 'uses default container.build', ->
       config.init {}
-      [file, encoding] = config.getBuildFile()
+      {file, encoding} = config.getBuildFile()
       expect( file ).to.equal config._defaults.container.build
       expect( encoding ).to.equal config._defaults.container.encoding
 
