@@ -1,3 +1,4 @@
+log = require './Logger'
 Utils = require './Utils'
 os = require 'os'
 path = require 'path'
@@ -5,6 +6,8 @@ _ = require 'lodash'
 
 # HOMEPATH and USERPROFILE are win32
 HOMEDIR = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE
+
+INSTALLDIR = path.join HOMEDIR, '.airstack'
 
 
 class Config
@@ -19,10 +22,15 @@ class Config
       APP_ENV: 'development'
     # Paths are relative to paths.base or absolute
     paths:
-      base: path.join HOMEDIR, '.airstack'
-      tmp: Utils.randomTmpDir()
+      base: INSTALLDIR
       log: 'log'
       data: 'data'
+      # Create random dir inside of OS tmp dir
+      tmp: Utils.randomTmpDir()
+      # Set config path to absolute path in case base is changed.
+      # It's best if config files are universal for an Airstack install.
+      # Only one of Samba, VirtualBox, etc. can be running at a time.
+      config: path.join INSTALLDIR, 'config'
 
   constructor: ->
     @_config = @_defaults
@@ -54,14 +62,23 @@ class Config
     # TODO: resolve semantic version and add version tag
     @_config.container.image
 
-  getTmpDir: ->
-    path.resolve @_config.paths.base, @_config.paths.tmp
+  getTmpDir: (app = '') ->
+    @getDir 'tmp', app
 
   getLogDir: (app = '') ->
-    path.resolve @_config.paths.base, @_config.paths.log, app
+    @getDir 'log', app
 
   getDataDir: (app = '') ->
-    path.resolve @_config.paths.base, @_config.paths.data, app
+    @getDir 'data', app
+
+  getConfigDir: ->
+    @getDir 'config'
+
+  getConfigFile: (file) ->
+    path.join @getConfigDir(), file
+
+  getDir: (pathname, app = '') ->
+    path.resolve @_config.paths.base, @_config.paths[pathname], app
 
   normalizePaths: ->
     base = @_config.paths.base
