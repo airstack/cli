@@ -17,6 +17,7 @@ class VirtualBox extends VirtualMachine
     start: ['boot2docker', ['up']]
     ip: ['boot2docker', ['ip']]
     info: ['boot2docker', ['info']]
+    down: ['boot2docker', ['down']]
 
   constructor: ->
     @_state = null
@@ -69,6 +70,9 @@ class VirtualBox extends VirtualMachine
     @info()
     .then =>
       @_startVM()  unless @isRunning()
+
+  down: ->
+    @_runBoot2DockerCmd @cmd.down
 
   status: ->
     @info()

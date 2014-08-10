@@ -35,6 +35,14 @@ class Commands
     .then =>
       @build()
 
+  down: ->
+    Promise.all [
+      @samba.kill()
+      @vm.down()
+    ]
+    .then ->
+      log.info '[ DONE ]'.grey
+
   build: ->
     throw 'Invalid Docker address'  unless @vm.getDockerIP() and @vm.getDockerPort()
     docker = new Docker host: "http://#{@vm.getDockerIP()}", port: @vm.getDockerPort()

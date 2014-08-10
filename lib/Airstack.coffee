@@ -23,7 +23,10 @@ class Airstack
     .then =>
       @run cmd
     .then =>
-      @watch()  if cmd is 'up'
+      if cmd is 'up'
+        @watch()
+      else
+        process.exit()
 
   loadConfig: ->
     Parser.loadYaml @configFile
