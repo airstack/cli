@@ -35,28 +35,32 @@ class VirtualBox extends VirtualMachine
   getDockerPort: ->
     @_info.DockerPort
 
+  # Get info and ip, return info
   info: ->
-    # Get info and ip, return info
     # todo: use cancellable and timeout
     # @runBoot2DockerCmd @cmd.info, data: ->, error: ->, timeout: 1000
-    Promise.all [
-      @_runBoot2DockerCmd @cmd.info #, data: @_streams.silent
-        .then (data, error, code) =>
-          try
-            @_info = JSON.parse "#{data}".trim()
-          catch e
-            @_info = {}
-          log.debug 'info:'.bold, @_info
-          @_state = @_info.State
-          @_info
-        .catch (e) =>
+    info = @_runBoot2DockerCmd @cmd.info, data: @_streams.silent
+      .then (data, error, code) =>
+        try
+          @_info = JSON.parse "#{data}".trim()
+        catch e
           @_info = {}
-      @_runBoot2DockerCmd @cmd.ip, data: @_streams.silent, error: @_streams.ignore
-        .then (data) =>
-          log.debug 'ip:'.bold, data
-          @_ip = data or null
-        .catch (e) =>
-          @_ip = null
+        log.debug 'info:'.bold, @_info
+        @_state = @_info.State
+        @_info
+      .catch (e) =>
+        @_info = {}
+
+    ip = @_runBoot2DockerCmd @cmd.ip, data: @_streams.silent, error: @_streams.ignore
+      .then (data) =>
+        log.debug 'ip:'.bold, data
+        @_ip = data or null
+      .catch (e) =>
+        @_ip = null
+
+    Promise.all [
+      info
+      ip
     ]
     .then =>
       @_info
