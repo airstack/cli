@@ -26,6 +26,9 @@ class Process
   _detached: false
   _configFile: null
 
+  # Automatically lookup pid if not set
+  _autoLookup: true
+
   _process: null
   _pid: null
   _logFiles:
@@ -45,14 +48,14 @@ class Process
   pid: ->
     @_pid
 
-  # Override in subclass as needed.
-  # Every method that returns a Promise should first call init.
-  init: ->
+  init: (autoLookup = @_autoLookup) ->
     return Promise.resolve()  if @_initialized
     @initConfig()
-    .then @initLogs.bind @
+    .then =>
+      @initLogs()
     .then =>
       @_initialized = true
+      @lookupPid()  if autoLookup and not @_pid
 
   # Run process.
   # @param {String} cmd   Command to start
@@ -62,7 +65,7 @@ class Process
   # @return Promise
   start: ->
     log.info "[#{@_cmd}]".grey, 'starting'
-    @init()
+    @init false
     .then =>
       if @_detached
         @_opts.detached = true
@@ -74,21 +77,11 @@ class Process
         child = null
       @_process = child
 
+  # Starts process only if not already running.
   up: ->
     @init()
-    .then @attach.bind @
-    .then (pid) =>
-      @start()  unless pid
-
-  attach: ->
-    @init()
-    .then @lookupPid.bind @
-    .then (pid) =>
-      if pid
-        log.info "[#{@_cmd}]".grey, 'already running:', pid
-      else
-        log.info "[#{@_cmd}]".grey, 'not running'
-      @_pid = pid
+    .then =>
+      @start()  unless @_pid
 
   lookupPid: ->
     # get the command started by launchd (pid=1)
@@ -98,13 +91,20 @@ class Process
     # `pgrep -o -f '@toString()'`
     # todo: use `ps` then filter results to find pid of running process
     # https://github.com/neekey/ps/blob/master/lib/index.js
-    @init()
+    @init false
     .then =>
       exec "pgrep -o -f #{@_fullCmd}", timeout: 100
-    .spread (stdout, stderr) ->
-      parseInt stdout
-    .catch (err) ->
-      unless err.cause.code is 1
+    .spread (stdout, stderr) =>
+      @_pid = parseInt(stdout) or null
+      if @_pid
+        log.info "[#{@_cmd}]".grey, 'already running:', @_pid
+      else
+        log.info "[#{@_cmd}]".grey, 'not running'
+    .catch (err) =>
+      # pgrep returns 1 when process is not found
+      if err.cause.code is 1
+        @_pid = null
+      else
         log.error '[pgrep]'.grey, err
         Promise.reject err
 
