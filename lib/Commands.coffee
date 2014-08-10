@@ -27,7 +27,7 @@ class Commands
   # send tar to Docker API build
   # send run cmd to Docker API
   # echo out ip address and port of app container
-  up: (opts) ->
+  up: ->
     Promise.all [
       @samba.up()
       @vm.up()
