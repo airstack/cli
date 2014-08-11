@@ -54,6 +54,8 @@ class Process
     .then =>
       @initLogs()
     .then =>
+      @_init()  if @_init
+    .then =>
       @_initialized = true
       @lookupPid()  if autoLookup and not @_pid
 

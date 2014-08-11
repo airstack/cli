@@ -14,4 +14,8 @@ class Samba extends Process
   _args: ['-F', '-S', '--no-process-group', '--debuglevel=1', "--configfile=#{config.getConfigFile(CONFIGFILE)}"]
   _configFile: CONFIGFILE
 
+  _init: ->
+    @initMounts()
+
+  initMounts: (mounts) ->
 module.exports = Samba
