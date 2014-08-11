@@ -3,6 +3,7 @@ Utils = require './Utils'
 os = require 'os'
 path = require 'path'
 _ = require 'lodash'
+uuid = require 'node-uuid'
 
 # HOMEPATH and USERPROFILE are win32
 HOMEDIR = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE
@@ -34,6 +35,7 @@ class Config
 
   constructor: ->
     @_config = @_defaults
+    @uuid = uuid.v1()
 
   init: (config = {}) ->
     clone = _.cloneDeep config
