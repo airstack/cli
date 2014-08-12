@@ -37,6 +37,7 @@ container:
 # into the container and see all the relevant mounts and data.
 mount:
   - ./
+  - ./defaults
 
 scripts:
   # Automatically run start scripts on `air up`
