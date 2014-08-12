@@ -48,16 +48,20 @@ class Process
   pid: ->
     @_pid
 
+  # Override in subclass.
+  afterInit: ->
+
   init: (autoLookup = @_autoLookup) ->
     return Promise.resolve()  if @_initialized
     @initConfig()
     .then =>
       @initLogs()
     .then =>
-      @_init()  if @_init
+      @lookupPid()  if autoLookup and not @_pid
+    .then =>
+      @afterInit()
     .then =>
       @_initialized = true
-      @lookupPid()  if autoLookup and not @_pid
 
   # Run process.
   # @param {String} cmd   Command to start
@@ -93,9 +97,7 @@ class Process
     # `pgrep -o -f '@toString()'`
     # todo: use `ps` then filter results to find pid of running process
     # https://github.com/neekey/ps/blob/master/lib/index.js
-    @init false
-    .then =>
-      exec "pgrep -o -f #{@_fullCmd}", timeout: 100
+    exec "pgrep -o -f #{@_fullCmd}", timeout: 100
     .spread (stdout, stderr) =>
       @_pid = parseInt(stdout) or null
       if @_pid

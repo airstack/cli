@@ -33,7 +33,12 @@ class Commands
       @vm.up()
     ]
     .then =>
-      @build()
+      Promise.all [
+        @samba.mount()
+        @build()
+      ]
+    .then =>
+      @run()
 
   down: ->
     Promise.all [
@@ -59,6 +64,9 @@ class Commands
     .then ->
       log.debug 'Sending Docker.tar:'.grey, dockerURL
       docker.build bundler.getFile(), config.getName()
+
+  run: ->
+    log.error 'Need to implement run'
 
   cleanup: ->
     @samba.kill()

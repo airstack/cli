@@ -5,7 +5,9 @@ Promise = require 'bluebird'
 log = require '../lib/Logger'
 config = require '../lib/Config'
 Ini = require '../lib/Ini'
+Utils = require '../lib/Utils'
 path = require 'path'
+exec = Promise.promisify require('child_process').exec
 fsReadFile = Promise.promisify require('fs').readFile
 fsWriteFile = Promise.promisify require('fs').writeFile
 _ = require 'lodash'
@@ -33,28 +35,55 @@ class Samba extends Process
   constructor: ->
     super
 
-  _init: ->
+  afterInit: ->
     fsReadFile @getConfigFile()
     .then (conf) =>
-      @_ini = new IniParser conf.toString()
+      @_ini = new Ini conf.toString()
       @initMounts config.getMounts()
+    .then =>
       @updateConfig()
+    .then =>
+      @reload()  if @_pid
 
   initMounts: (mounts) ->
-    @_mounts = for m in mounts
+    mounts = for m in mounts
       mountPath = path.resolve path.normalize m
-      m = path.relative process.cwd(), m
-      m = _.compact m.split path.sep
-      m = if m.length then "__#{m.join '-'}" else ''
-      {
-        name: "#{config.getName()}_#{config.uuid}#{m}"
-        path: mountPath
-      }
+      Utils.exists mountPath
+      .then ((mountPath, exists) ->
+        return null  unless exists
+        m = path.relative process.cwd(), mountPath
+        m = _.compact m.split path.sep
+        m = if m.length then "__#{m.join '-'}" else ''
+        {
+          name: "#{config.getName()}_#{config.uuid}#{m}"
+          path: mountPath
+        }
+      ).bind null, mountPath
+    Promise.all mounts
+    .then (mounts) =>
+      @_mounts = _.compact mounts
+
+  mount: ->
+    # TODO: use VirtualMachine#runCmd to abstract boot2docker commands
+    @_waitForVM()
+    .then =>
+      cmds = for m in @_mounts
+        mountPath = "/mnt/airstack/samba/#{m.name}"
+        cmd = "boot2docker ssh sudo mkdir -vp #{mountPath}"
+        log.debug '[ vm ]'.grey, cmd
+        exec cmd, timeout: 1000
+        .then ((name, mountPath) ->
+          cmd = "boot2docker ssh sudo mount -t cifs //192.168.59.3/#{name} -o username=\"\",guest,port=9000,uid=\\`id -u docker\\`,gid=\\`id -g docker\\` #{mountPath}"
+          log.debug '[ vm ]'.grey, cmd
+          exec cmd, timeout: 5000
+        ).bind null, m.name, mountPath
+      Promise.all cmds
 
   updateConfig: ->
     for m in @_mounts
       @_ini.replaceSection m.name, @mountTpl m
     fsWriteFile @getConfigFile(), @_ini.toString()
+    # todo: probably also push mounts back to config???
 
   mountTpl: (data) ->
     str = @_mountTpl
@@ -62,10 +91,41 @@ class Samba extends Process
       str = str.replace ///{#{k}}///g, v
     str
 
-    # todo: probably also push mounts back to config???
+  reload: ->
+    process.kill @_pid, 'SIGHUP'  if @_pid
+    Promise.delay 500
 
-    # async: add dirs in virtualbox
-    # after samba starts,
+  kill: ->
+    # TODO: clean up mounts in VM
+    super
+
+  # Make sure VM is responding to ssh commands
+  # TODO: use VirtualMachine#runCmd to abstract command
+  _waitForVM: (maxRetries = 20, waitTime = 500) ->
+    new Promise (resolve, reject) ->
+      num = 0
+      wait = ->
+        setTimeout ->
+          num++
+          log.warn 'num', num
+          retry()
+        , waitTime
+      retry = ->
+        log.debug '[ vm ]'.grey, 'Waiting for VM to start:', num
+        if num >= maxRetries
+          log.error '[ vm ]'.grey, 'Max retries reached waiting for VM'
+          return reject ''
+        exec 'boot2docker ssh echo up', timeout: 500
+        .spread (stdout, stderr) ->
+          if stdout and stdout.trim() == 'up'
+            resolve()
+          else
+            wait()
+        .catch (err) ->
+          log.error 'err', num
+          wait()
+      retry()
+
 
 
 module.exports = Samba
