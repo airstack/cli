@@ -131,11 +131,14 @@ class Process
   reload: ->
     throw 'Process#reload must be implemented in subclass.'
 
+  getConfigFile: ->
+    @_configFilePath ?= config.getConfigFile @_configFile
+
   # Initialize config file if @configFile is present.
   initConfig: ->
     return Promise.resolve()  unless @_configFile
     # Copy default config file from cli/config/* if config is not present
-    conf = config.getConfigFile @_configFile
+    conf = @getConfigFile()
     Utils.exists conf
     .then (configExists) =>
       return true  if configExists
