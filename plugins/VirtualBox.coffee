@@ -46,7 +46,6 @@ class VirtualBox extends VirtualMachine
           @_info = JSON.parse "#{data}".trim()
         catch e
           @_info = {}
-        log.debug 'info:'.bold, @_info
         @_state = @_info.State
         @_info
       .catch (e) =>
