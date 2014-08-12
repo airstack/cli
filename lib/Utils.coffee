@@ -84,4 +84,10 @@ Utils =
     path.join @_tmpDir, dir, Utils.randomString 5
 
 
+  ###*
+  Escape a string for use in regex.
+  ###
+  escapeRegExp: (str) ->
+    str.replace /[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&'
+
 module.exports = Utils
