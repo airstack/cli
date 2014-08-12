@@ -57,6 +57,9 @@ class Config
         @file
     }
 
+  getMounts: ->
+    @_config.mount
+
   getENV: ->
     @_config.ENV.APP_ENV
 
