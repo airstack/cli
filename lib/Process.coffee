@@ -12,7 +12,6 @@ Utils = require './Utils'
 log = require './Logger'
 
 
-
 class Process extends Exec
   # Example:
   # _cmd: 'ls'
@@ -126,7 +125,15 @@ class Process extends Exec
         throw err
 
   reload: ->
-    throw 'Process#reload must be implemented in subclass.'
+    @exec "pgrep -f #{@_fullCmd}",
+      timeout: 100,
+      data: @_output.silent
+    .spread (stdout, stderr) =>
+      pids = stdout.trim().split '\n'
+      log.info "[#{@_cmd}]".grey, 'reloading:', pids.join ' '
+      for pid in pids
+        pid = parseInt pid
+        process.kill pid, 'SIGHUP'  if pid
 
   getConfigFile: ->
     @_configFilePath ?= config.getConfigFile @_configFile

@@ -91,9 +91,6 @@ class Samba extends Process
       str = str.replace ///{#{k}}///g, v
     str
 
-  reload: ->
-    process.kill @_pid, 'SIGHUP'  if @_pid
-    Promise.delay 500
 
   kill: ->
     # TODO: clean up mounts in VM
