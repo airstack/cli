@@ -100,3 +100,36 @@ module.exports =
     silent: (msg) ->
       msg
 
+
+  # @return {Array}  pids
+  pgrep: (cmd, opts = {}) ->
+    _.defaults opts,
+      timeout: 100
+      oldest: false
+      data: @output.silent
+    flags = if opts.oldest then '-o' else ''
+    @exec "pgrep #{flags} -d ',' -f #{cmd}", opts
+    .spread (stdout, stderr) =>
+      pids = stdout.trim().split(',').map (pid) ->
+        parseInt pid
+      _.compact pids
+    .catch (err) ->
+      # pgrep returns 1 when process is not found
+      if err.cause and err.cause.code is 1
+        Promise.resolve []
+      else
+        log.error '[pgrep]'.grey, err
+        Promise.reject err
+
+
+  kill: (pid, signal = 'SIGTERM') ->
+    if pid
+      log.debug '[kill]'.grey, "Sending #{signal} to #{pid}"
+      process.kill pid, signal
+
+
+  killAll: (cmd, signal = 'SIGTERM', opts = {}) ->
+    @pgrep cmd, opts
+    .then (pids) =>
+      @kill pid, signal for pid in pids
+

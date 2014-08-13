@@ -83,59 +83,27 @@ class Process
       @start()  unless @_pid
 
   lookupPid: ->
-    # get the command started by launchd (pid=1)
-    # `pgrep -P 1 -f '@toString()'`
-    # OR
-    # get the oldest and assume it's the parent
-    # `pgrep -o -f '@toString()'`
-    # todo: use `ps` then filter results to find pid of running process
-    # https://github.com/neekey/ps/blob/master/lib/index.js
-    ps.exec "pgrep -o -f #{@_fullCmd}",
-      timeout: 100,
-      data: ps.output.silent
-    .spread (stdout, stderr) =>
-      @_pid = parseInt(stdout) or null
+    ps.pgrep @_fullCmd, oldest: true
+    .then (pids) =>
+      @_pid = pids[0]
       if @_pid
         log.info "[#{@_cmd}]".grey, 'already running:', @_pid
       else
         log.info "[#{@_cmd}]".grey, 'not running'
-    .catch (err) =>
-      # pgrep returns 1 when process is not found
-      if err.cause and err.cause.code is 1
-        @_pid = null
-      else
-        log.error '[pgrep]'.grey, err
-        Promise.reject err
 
   status: ->
     # todo: implement by querying ps and getting cpu, mem, etc.
     @init()
     # get stats for all relevant processes and sum them
-    # ps -ax -o pid,%cpu,%mem,rss,time,etime,command | grep "#{cmd}"
+    # ps -A -o pid,%cpu,%mem,rss,time,etime,command | grep "[V]Box"
 
   kill: (signal = 'SIGTERM') ->
     log.info "[#{@_cmd}]".grey, 'stopping'
-    @init()
-    .then =>
-      throw { code: 'ESRCH', errno: 'ESRCH', syscall: 'kill' }  unless @_pid
-      process.kill @_pid, signal
-    .catch (err) =>
-      # Rethrow unless error was due nonexistent process
-      if err.code is 'ESRCH'
-        log.warn "[#{@_cmd}]".grey, 'did not exist', @_pid
-      else
-        throw err
+    ps.killAll @_fullCmd, signal
 
   reload: ->
-    ps.exec "pgrep -f #{@_fullCmd}",
-      timeout: 100,
-      data: ps.output.silent
-    .spread (stdout, stderr) =>
-      pids = stdout.trim().split '\n'
-      log.info "[#{@_cmd}]".grey, 'reloading:', pids.join ' '
-      for pid in pids
-        pid = parseInt pid
-        process.kill pid, 'SIGHUP'  if pid
+    log.info "[#{@_cmd}]".grey, 'reloading'
+    ps.killAll @_fullCmd, 'SIGHUP'
 
   getConfigFile: ->
     @_configFilePath ?= config.getConfigFile @_configFile
