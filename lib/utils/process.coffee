@@ -136,5 +136,5 @@ module.exports =
 
   stats: (cmd) ->
     # todo: implement
-    # ps -A -c -o pid,%cpu,%mem,rss,time,etime,command | awk 'NR == 1 || /[V]Box/' | sed -e 's/^ *//' -e 's/[ ]\{1,\}/,/g'
+    # ps -A -c -o pid,%cpu,%mem,rss,time,etime,command | awk 'NR == 1 || /[V]Box/' | sed -e 's/^ */"/' -e 's/$/\"/g' -e $'s/[[:space:]]\{1,\}/","/g'
 
