@@ -4,9 +4,8 @@
 # calling #start to ensure the correct pid is obtained.
 
 Promise = require 'bluebird'
+Exec = require './Exec'
 path = require 'path'
-spawn = require('child_process').spawn
-exec = Promise.promisify require('child_process').exec
 fsOpen = Promise.promisify require('fs').open
 config = require './Config'
 Utils = require './Utils'
@@ -14,8 +13,7 @@ log = require './Logger'
 
 
 
-
-class Process
+class Process extends Exec
   # Example:
   # _cmd: 'ls'
   # _args: ['-la']
@@ -29,7 +27,6 @@ class Process
   # Automatically lookup pid if not set
   _autoLookup: true
 
-  _process: null
   _pid: null
   _logFiles:
     stdout: null
@@ -76,12 +73,9 @@ class Process
       if @_detached
         @_opts.detached = true
         @_opts.stdio = ['ignore', @stdout, @stderr]
-      child = spawn @_fullCmd, @_args, @_opts
-      @_pid = child.pid
-      if @_detached
-        child.unref()
-        child = null
-      @_process = child
+      @spawn @_fullCmd, @_args, @_opts
+    .then (results) =>
+      @_pid = results.pid
 
   # Starts process only if not already running.
   up: ->
@@ -97,7 +91,9 @@ class Process
     # `pgrep -o -f '@toString()'`
     # todo: use `ps` then filter results to find pid of running process
     # https://github.com/neekey/ps/blob/master/lib/index.js
-    exec "pgrep -o -f #{@_fullCmd}", timeout: 100
+    @exec "pgrep -o -f #{@_fullCmd}",
+      timeout: 100,
+      data: @_output.silent
     .spread (stdout, stderr) =>
       @_pid = parseInt(stdout) or null
       if @_pid
@@ -106,7 +102,7 @@ class Process
         log.info "[#{@_cmd}]".grey, 'not running'
     .catch (err) =>
       # pgrep returns 1 when process is not found
-      if err.cause.code is 1
+      if err.cause and err.cause.code is 1
         @_pid = null
       else
         log.error '[pgrep]'.grey, err
@@ -120,9 +116,8 @@ class Process
     log.info "[#{@_cmd}]".grey, 'stopping'
     @init()
     .then =>
-      pid = @_process and @_process.pid or @_pid
-      throw { code: 'ESRCH', errno: 'ESRCH', syscall: 'kill' }  unless pid
-      process.kill pid, signal
+      throw { code: 'ESRCH', errno: 'ESRCH', syscall: 'kill' }  unless @_pid
+      process.kill @_pid, signal
     .catch (err) =>
       # Rethrow unless error was due nonexistent process
       if err.code is 'ESRCH'
@@ -147,8 +142,8 @@ class Process
       src = path.join __dirname, '../config', @_configFile
       log.debug '[ init ]'.grey, "Copying #{src} to #{conf}"
       Utils.mkdir config.getConfigDir()
-      .then ->
-        exec "cp #{src} #{conf}", timeout: 100
+      .then =>
+        @exec "cp #{src} #{conf}", timeout: 100
       .spread (stdout, stderr) ->
         log.debug stderr  if stderr
     .then =>

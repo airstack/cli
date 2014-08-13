@@ -7,17 +7,19 @@ VM_UUID=$(VBoxManage list runningvms | grep boot2docker | cut -d ' ' -f 2 | sed 
 ###
 
 VirtualMachine = require '../lib/VirtualMachine'
-spawn = require('child_process').spawn
+Exec = require '../lib/Exec'
+Promise = require 'bluebird'
 log = require '../lib/Logger'
-_ = require 'lodash'
 
 
-class VirtualBox extends VirtualMachine
+class VirtualBox extends VirtualMachine and Exec
   cmd:
+    # spawn commands to see realtime output
     start: ['boot2docker', ['up']]
-    ip: ['boot2docker', ['ip']]
-    info: ['boot2docker', ['info']]
     down: ['boot2docker', ['down']]
+    # exec commands
+    ip: 'boot2docker ip'
+    info: 'boot2docker info'
 
   constructor: ->
     @_state = null
@@ -38,25 +40,28 @@ class VirtualBox extends VirtualMachine
 
   # Get info and ip, return info
   info: ->
-    # todo: use cancellable and timeout
-    # @runBoot2DockerCmd @cmd.info, data: ->, error: ->, timeout: 1000
-    info = @_runBoot2DockerCmd @cmd.info, data: @_streams.silent
-      .then (data, error, code) =>
-        try
-          @_info = JSON.parse "#{data}".trim()
-        catch e
-          @_info = {}
-        @_state = @_info.State
-        @_info
-      .catch (e) =>
-        @_info = {}
+    silent =
+      data: @_output.silent
+      error: @_output.silent
 
-    ip = @_runBoot2DockerCmd @cmd.ip, data: @_streams.silent, error: @_streams.ignore
-      .then (data) =>
-        log.debug 'ip:'.bold, data
-        @_ip = data or null
-      .catch (e) =>
-        @_ip = null
+    # todo: use cancellable and timeout
+    info = @exec @cmd.info, silent
+    .spread (stdout, stderr) =>
+      try
+        @_info = JSON.parse "#{stdout}".trim()
+      catch e
+        @_info = {}
+      @_state = @_info.State
+      @_info
+    .catch (err) =>
+      @_info = {}
+
+    ip = @exec @cmd.ip, silent
+    .spread (stdout, stderr) =>
+      @_ip = stdout or null
+    .catch (err) =>
+      log.warn 'Unable to get Docker IP'
+      @_ip = null
 
     Promise.all [
       info
@@ -71,7 +76,7 @@ class VirtualBox extends VirtualMachine
       @_startVM()  unless @isRunning()
 
   down: ->
-    @_runBoot2DockerCmd @cmd.down
+    @spawn @cmd.down
 
   status: ->
     @info()
@@ -90,67 +95,11 @@ class VirtualBox extends VirtualMachine
     # OR FOR SAFETY ...
     # `boot2docker delete && boot2docker init`
 
-  runBoot2DockerCmd: (cmd, opts) ->
-    if @isRunning()
-      @_runBoot2DockerCmd cmd, opts
-    else
-      @_startVM()
-      .then =>
-        @_runBoot2DockerCmd cmd, opts
-
-  _runBoot2DockerCmd: (cmd, opts = {}) ->
-    debug = (type, msg) ->
-      log.debug msg.toString()
-      msg
-    _.defaults opts,
-      data: debug.bind null, '[stdout]'.grey
-      error: debug.bind null, '[stderr]'.grey
-      timeout: null
-    _data = ''
-    _error = ''
-    cmdStr = @_cmdToString cmd
-    # todo: use cancellable and timeout
-    new Promise (resolve, reject) ->
-      log.debug '[ RUN  ]'.grey, cmdStr
-      proc = spawn.apply null, cmd
-      proc.stdout.on 'data', (data) ->
-        _data += opts.data data
-      proc.stderr.on 'data', (data) ->
-        _error += opts.error data
-      proc.on 'exit', (code) ->
-        log.debug '[ DONE ]'.grey, cmdStr, '=>', code
-        if code is 0
-          resolve _data, _error, code
-        else
-          reject _error, _data, code
-
-  _cmdToString: (cmd) ->
-    if _.isString cmd
-      cmd
-    else if _.isArray cmd
-      "#{cmd[0]} #{(cmd[1] || []).join ' '}"
-    else
-      cmd.toString()
-
   _startVM: ->
-    @_runBoot2DockerCmd @cmd.start,
+    @spawn @cmd.start,
       # Redirect error output to show progress in realtime
-      error: @_streams.intercept
+      error: @_output.intercept
     .then =>
       @info()
-
-
-  # Use with _runBoot2DockerCmd streams to handle output
-  _streams:
-    # Redirect output to log.debug
-    intercept: (msg) ->
-      process.stderr.write msg.toString()
-      ''
-    # Discard output
-    ignore: (msg) ->
-      ''
-    # Suppress debug output
-    silent: (msg) ->
-      msg
 
 module.exports = VirtualBox
