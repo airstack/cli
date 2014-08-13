@@ -1,5 +1,6 @@
 Table = require 'cli-table'
 
+
 class StatusTable
   constructor: ->
     @table = new Table
@@ -16,5 +17,6 @@ class StatusTable
     for row in data
       @table.push row
     @table.toString()
+
 
 module.exports = StatusTable

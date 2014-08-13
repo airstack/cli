@@ -3,6 +3,7 @@
 # https://github.com/chriso/cli
 cli = require 'cli'
 
+
 class Cli
   constructor: ->
     @_parse()

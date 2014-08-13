@@ -2,6 +2,7 @@ Dockerode = require 'dockerode'
 log = require './Logger'
 _ = require 'lodash'
 
+
 class Docker
   constructor: (opts) ->
     @_docker = new Dockerode opts
@@ -31,7 +32,6 @@ class Docker
           else
             log.info 'Built image:', imageName
             resolve()
-
 
 
 module.exports = Docker

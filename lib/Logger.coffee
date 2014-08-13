@@ -67,5 +67,6 @@ class Logger
   log: (level) ->
     @logger.log.apply @logger, arguments
 
+
 # singleton
 module.exports = new Logger

@@ -15,4 +15,5 @@ Parser =
   _loadFile: (file, encoding = @defaults.encoding) ->
     readFile path.normalize(file), encoding
 
+
 module.exports = Parser

@@ -14,4 +14,5 @@ class Ini
   toString: ->
     @_ini
 
+
 module.exports = Ini
