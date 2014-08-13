@@ -4,15 +4,15 @@
 # calling #start to ensure the correct pid is obtained.
 
 Promise = require 'bluebird'
-Exec = require './Exec'
+ps = require './utils/process'
 path = require 'path'
 fsOpen = Promise.promisify require('fs').open
 config = require './Config'
-Utils = require './Utils'
+utils = require './utils'
 log = require './Logger'
 
 
-class Process extends Exec
+class Process
   # Example:
   # _cmd: 'ls'
   # _args: ['-la']
@@ -72,7 +72,7 @@ class Process extends Exec
       if @_detached
         @_opts.detached = true
         @_opts.stdio = ['ignore', @stdout, @stderr]
-      @spawn @_fullCmd, @_args, @_opts
+      ps.spawn @_fullCmd, @_args, @_opts
     .then (results) =>
       @_pid = results.pid
 
@@ -90,9 +90,9 @@ class Process extends Exec
     # `pgrep -o -f '@toString()'`
     # todo: use `ps` then filter results to find pid of running process
     # https://github.com/neekey/ps/blob/master/lib/index.js
-    @exec "pgrep -o -f #{@_fullCmd}",
+    ps.exec "pgrep -o -f #{@_fullCmd}",
       timeout: 100,
-      data: @_output.silent
+      data: ps.output.silent
     .spread (stdout, stderr) =>
       @_pid = parseInt(stdout) or null
       if @_pid
@@ -110,6 +110,8 @@ class Process extends Exec
   status: ->
     # todo: implement by querying ps and getting cpu, mem, etc.
     @init()
+    # get stats for all relevant processes and sum them
+    # ps -ax -o pid,%cpu,%mem,rss,time,etime,command | grep "#{cmd}"
 
   kill: (signal = 'SIGTERM') ->
     log.info "[#{@_cmd}]".grey, 'stopping'
@@ -125,9 +127,9 @@ class Process extends Exec
         throw err
 
   reload: ->
-    @exec "pgrep -f #{@_fullCmd}",
+    ps.exec "pgrep -f #{@_fullCmd}",
       timeout: 100,
-      data: @_output.silent
+      data: ps.output.silent
     .spread (stdout, stderr) =>
       pids = stdout.trim().split '\n'
       log.info "[#{@_cmd}]".grey, 'reloading:', pids.join ' '
@@ -143,14 +145,14 @@ class Process extends Exec
     return Promise.resolve()  unless @_configFile
     # Copy default config file from cli/config/* if config is not present
     conf = @getConfigFile()
-    Utils.exists conf
+    utils.fs.exists conf
     .then (configExists) =>
       return true  if configExists
       src = path.join __dirname, '../config', @_configFile
       log.debug '[ init ]'.grey, "Copying #{src} to #{conf}"
-      Utils.mkdir config.getConfigDir()
-      .then =>
-        @exec "cp #{src} #{conf}", timeout: 100
+      utils.fs.mkdir config.getConfigDir()
+      .then ->
+        ps.exec "cp #{src} #{conf}", timeout: 100
       .spread (stdout, stderr) ->
         log.debug stderr  if stderr
     .then =>
@@ -163,7 +165,7 @@ class Process extends Exec
     dir = config.getLogDir @_cmd
     @_logFiles.stdout = path.join dir, 'stdout.log'  unless @_logFiles.stdout
     @_logFiles.stderr = path.join dir, 'stderr.log'  unless @_logFiles.stderr
-    Utils.mkdir dir
+    utils.fs.mkdir dir
     .then =>
       Promise.join(
         fsOpen @_logFiles.stdout, 'a'

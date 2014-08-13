@@ -7,12 +7,12 @@ VM_UUID=$(VBoxManage list runningvms | grep boot2docker | cut -d ' ' -f 2 | sed 
 ###
 
 VirtualMachine = require '../lib/VirtualMachine'
-Exec = require '../lib/Exec'
+ps = require '../lib/utils/process'
 Promise = require 'bluebird'
 log = require '../lib/Logger'
 
 
-class VirtualBox extends VirtualMachine and Exec
+class VirtualBox extends VirtualMachine
   cmd:
     # spawn commands to see realtime output
     start: ['boot2docker', ['up']]
@@ -41,11 +41,11 @@ class VirtualBox extends VirtualMachine and Exec
   # Get info and ip, return info
   info: ->
     silent =
-      data: @_output.silent
-      error: @_output.silent
+      data: ps.output.silent
+      error: ps.output.silent
 
     # todo: use cancellable and timeout
-    info = @exec @cmd.info, silent
+    info = ps.exec @cmd.info, silent
     .spread (stdout, stderr) =>
       try
         @_info = JSON.parse "#{stdout}".trim()
@@ -56,7 +56,7 @@ class VirtualBox extends VirtualMachine and Exec
     .catch (err) =>
       @_info = {}
 
-    ip = @exec @cmd.ip, silent
+    ip = ps.exec @cmd.ip, silent
     .spread (stdout, stderr) =>
       @_ip = stdout or null
     .catch (err) =>
@@ -76,7 +76,7 @@ class VirtualBox extends VirtualMachine and Exec
       @_startVM()  unless @isRunning()
 
   down: ->
-    @spawn @cmd.down
+    ps.spawn @cmd.down
 
   status: ->
     @info()
@@ -96,9 +96,9 @@ class VirtualBox extends VirtualMachine and Exec
     # `boot2docker delete && boot2docker init`
 
   _startVM: ->
-    @spawn @cmd.start,
+    ps.spawn @cmd.start,
       # Redirect error output to show progress in realtime
-      error: @_output.intercept
+      error: ps.output.intercept
     .then =>
       @info()
 

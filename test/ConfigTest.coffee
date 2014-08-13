@@ -1,5 +1,4 @@
 config = require '../lib/Config'
-Utils = require '../lib/Utils'
 expect = require('./helpers/Common').expect
 os = require 'os'
 path = require 'path'

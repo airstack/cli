@@ -3,20 +3,11 @@ fs = Promise.promisifyAll require('fs')
 path = require 'path'
 os = require 'os'
 _ = require 'lodash'
+randomString = require('./string').random
 
 
-Utils =
+module.exports =
   _tmpDir: path.join os.tmpdir(), '.airstack'
-
-  ###*
-  _.defaults with deep merge.
-
-  @param {object} options
-  @param {object} defaults
-
-  Values from defaults are copied into options if not set in options.
-  ###
-  defaults: _.partialRight(_.merge, _.defaults)
 
   ###*
   Create specified directory.
@@ -50,22 +41,12 @@ Utils =
 
 
   ###*
-  Get random string.
-  ###
-  randomString: (length, chars = '0123456789abcdefghiklmnopqrstuvwxyz') ->
-    charsLen = chars.length
-    (for i in [1..length]
-      chars.substr Math.floor(Math.random() * charsLen), 1
-    ).join ''
-
-
-  ###*
   Get a random file name in the OS's tmp dir.
 
   Does not guarantee uniqueness.
   ###
   randomTmpFile: (filename) ->
-    filename = @randomString 10  unless filename
+    filename = randomString 10  unless filename
     path.join os.tmpdir(), @randomTmpDir(), filename
 
 
@@ -81,13 +62,4 @@ Utils =
       '-'
       (Math.random() * 0x1000000000).toString 36
     ].join ''
-    path.join @_tmpDir, dir, Utils.randomString 5
-
-
-  ###*
-  Escape a string for use in regex.
-  ###
-  escapeRegExp: (str) ->
-    str.replace /[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&'
-
-module.exports = Utils
+    path.join @_tmpDir, dir, randomString 5

@@ -5,7 +5,7 @@ Promise = require 'bluebird'
 log = require '../lib/Logger'
 config = require '../lib/Config'
 Ini = require '../lib/Ini'
-Utils = require '../lib/Utils'
+utils = require '../lib/utils'
 path = require 'path'
 exec = Promise.promisify require('child_process').exec
 fsReadFile = Promise.promisify require('fs').readFile
@@ -48,7 +48,7 @@ class Samba extends Process
   initMounts: (mounts) ->
     mounts = for m in mounts
       mountPath = path.resolve path.normalize m
-      Utils.exists mountPath
+      utils.fs.exists mountPath
       .then ((mountPath, exists) ->
         return null  unless exists
         m = path.relative process.cwd(), mountPath

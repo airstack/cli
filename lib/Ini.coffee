@@ -1,4 +1,4 @@
-Utils = require './Utils'
+utils = require './utils'
 
 
 class Ini
@@ -6,7 +6,7 @@ class Ini
     @_ini = iniData
 
   replaceSection: (section, data) ->
-    safe = Utils.escapeRegExp section
+    safe = utils.string.escapeRegExp section
     r = new RegExp "^\s*\[#{safe}\]\s*$\s(\s*^\s*[^\[\s].*$)*", 'gm'
     @_ini = @_ini.replace r, ''
     @_ini += "\n#{data}\n"

@@ -1,5 +1,5 @@
 log = require './Logger'
-Utils = require './Utils'
+utils = require './utils'
 os = require 'os'
 path = require 'path'
 _ = require 'lodash'
@@ -27,7 +27,7 @@ class Config
       log: 'log'
       data: 'data'
       # Create random dir inside of OS tmp dir
-      tmp: Utils.randomTmpDir()
+      tmp: utils.fs.randomTmpDir()
       # Set config path to absolute path in case base is changed.
       # It's best if config files are universal for an Airstack install.
       # Only one of Samba, VirtualBox, etc. can be running at a time.
@@ -39,7 +39,7 @@ class Config
 
   init: (config = {}) ->
     clone = _.cloneDeep config
-    Utils.defaults clone, @_defaults
+    utils.defaults clone, @_defaults
     @_config = clone
     @normalizePaths()
 

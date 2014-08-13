@@ -1,12 +1,12 @@
 Promise = require 'bluebird'
 spawn = require('child_process').spawn
 exec = Promise.promisify require('child_process').exec
-log = require './Logger'
+log = require '../Logger'
 path = require 'path'
 _ = require 'lodash'
 
 
-class Exec
+module.exports =
   ###*
   @param {Array} cmds  Array of string or array commands.
                        String commands will use process.exec.
@@ -88,7 +88,7 @@ class Exec
             reject data: _data, error: _error, code: code
 
   # Use with spawn streams to handle output
-  _output:
+  output:
     # Redirect output to log.debug
     intercept: (msg) ->
       process.stderr.write msg.toString()
@@ -100,5 +100,3 @@ class Exec
     silent: (msg) ->
       msg
 
-
-module.exports = Exec

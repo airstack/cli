@@ -5,13 +5,14 @@
 fs = require 'fs'
 Tar = require 'tar-async'
 config = require './Config'
-Utils = require './Utils'
+utils = require './utils'
 Promise = require 'bluebird'
 path = require 'path'
 
+
 class Bundler
   defaults:
-    tarFile: "docker_#{(new Date).getTime()}_#{Utils.randomString 5}.tar"
+    tarFile: "docker_#{(new Date).getTime()}_#{utils.string.random 5}.tar"
 
   constructor: ->
     @_tarFile = path.join config.getTmpDir(), @defaults.tarFile
@@ -22,7 +23,7 @@ class Bundler
 
   init: ->
     return Promise.resolve()  if @_tape
-    Utils.mkdir path.dirname @_tarFile
+    utils.fs.mkdir path.dirname @_tarFile
     .then =>
       @_tape = new Tar output: fs.createWriteStream @_tarFile
 
