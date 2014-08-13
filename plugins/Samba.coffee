@@ -68,7 +68,7 @@ class Samba extends Process
     @_waitForVM()
     .then =>
       cmds = for m in @_mounts
-        mountPath = "/mnt/airstack/samba/#{m.name}"
+        mountPath = "/mnt/airstack/smb/#{m.name}"
         cmd = "boot2docker ssh sudo mkdir -vp #{mountPath}"
         log.debug '[ vm ]'.grey, cmd
         exec cmd, timeout: 1000
