@@ -133,3 +133,8 @@ module.exports =
     .then (pids) =>
       @kill pid, signal for pid in pids
 
+
+  stats: (cmd) ->
+    # todo: implement
+    # ps -A -c -o pid,%cpu,%mem,rss,time,etime,command | awk 'NR == 1 || /[V]Box/' | sed -e 's/^ *//' -e 's/[ ]\{1,\}/,/g'
+
