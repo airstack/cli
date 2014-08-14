@@ -30,9 +30,10 @@ module.exports =
   #       execFunc c, opts
   #     Promise.all pcmds
 
+
   _execDefaults: (cmd, opts) ->
     # remove spaces from cmd and extract the bin name
-    cmd = cmd.replace(/\/(.+?)\s+(.+?)\//g, '/$1$2/')
+    cmd = cmd.replace /\/(.+?)\s+(.+?)\//g, '/$1$2/' #/ << extra slash for sublime highlighter
     cmd = cmd.split(' ')[0].split(path.sep).slice(-1)[0]
     debug = (type, msg) ->
       log.debug type, msg.toString().trim()  if msg
