@@ -7,6 +7,7 @@ VirtualMachine = require './VirtualMachine'
 Promise = require 'bluebird'
 charm = require('charm')(process)
 StatusTable = require './StatusTable'
+_ = require 'lodash'
 
 
 class Airstack
@@ -26,7 +27,7 @@ class Airstack
       if cmd is 'up'
         @watch()
       else
-        process.exit()
+        _.defer process.exit
 
   loadConfig: ->
     Parser.loadYaml @configFile
@@ -50,7 +51,7 @@ class Airstack
       # currently cmd.clienup will not be executed if user ^c quickly on air up
       @cmd.cleanup()
       .then ->
-        process.exit()
+        _.defer process.exit
     # Clear the screen while keeping log data after exit
     str = for i in [1..process.stdout.rows]
       "\n"
