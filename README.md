@@ -51,10 +51,14 @@ For MVP, the CLI focuses on the NodeJS community.
 
 ### NodeJS
 
-Node >=0.11.10 is required.
+Node >=0.10 is required.
+
+Use 0.10.30 until 0.11 is stable. There seems to be an issue with child_process.exec
+hanging on 0.11. This issue shows up occasionally when exiting `air up`. The
+pgrep exec will sometimes not return results or timeout properly.
 
 1. Install [NVM](https://github.com/creationix/nvm)
-2. `nvm use 0.11`
+2. `nvm use 0.10.30`
 
 ### Boot2Docker
 
