@@ -15,7 +15,6 @@ class Config
   _defaults:
     name: 'app'
     container:
-      build: "#{__dirname}/../defaults/Dockerfile"
       encoding: 'utf8'
     scripts: {}
     components: []

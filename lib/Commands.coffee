@@ -49,6 +49,9 @@ class Commands
       log.info '[ DONE ]'.grey
 
   build: ->
+    unless config.getBuildFile().file
+      log.debug '[build]'.grey, 'skipping build step: no Dockerfile specified'
+      return
     throw 'Invalid Docker address'  unless @vm.getDockerIP() and @vm.getDockerPort()
     docker = new Docker host: "http://#{@vm.getDockerIP()}", port: @vm.getDockerPort()
     builder = new Builder
