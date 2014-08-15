@@ -9,19 +9,26 @@
 # TODO
 
 - Samba
-  - add mounts to samba conf
-  - reload samba on conf chang
+  - X add mounts to samba conf
+  - X reload samba on conf change
+  - clean up smbd.conf on reload
+  - truncate smbd logs
 - CLI dashboard
   - output status of host processes: samba, virtualbox, etc.
   - keyboard support for switching between monitor and log view
   - status of containers
-- Web dashboard
-  - ???
-- CLI commands
-  - `air ssh <container>`
-  - `air down`
-  - `air restart <container>`
-  - tab completion for container names
+- Logging
+  - bind logger on vbox host ip address: https://github.com/airstack/airstack/blob/master/airsdk/base/make/init_share.sh
+  - pipe container logs to syslog service on host
+- Stats
+  - use pidusage.js as example for parsing proc data of containers for stats
+- `air up`
+  - add start command to runit script
+  - docker run
+- `air ssh <container>`
+- `air down`
+- `air restart <container>`
+- tab completion for container names
 - Install script
   - download node v0.11 into ~/.airstack/bin/node
   - http://nodejs.org/dist/
