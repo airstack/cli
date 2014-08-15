@@ -1,3 +1,4 @@
+Promise = require 'bluebird'
 Dockerode = require 'dockerode'
 log = require './Logger'
 _ = require 'lodash'
