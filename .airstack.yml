@@ -44,7 +44,6 @@ scripts:
   start:
     before: echo 'before'
     cmd: npm start
-    after: echo 'after'
   # OR
   # start: npm start
 
