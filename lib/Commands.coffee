@@ -61,7 +61,7 @@ class Commands
       log.info '[ DONE ]'.grey
 
   build: ->
-    unless config.getBuildFile().file
+    unless config.buildFile
       log.debug '[build]'.grey, 'skipping build step: no Dockerfile specified'
       return
     builder = new Builder
@@ -76,7 +76,7 @@ class Commands
       bundler.close()
     .then =>
       log.debug 'Sending Docker.tar:'.grey, dockerURL
-      @docker.build bundler.getFile(), config.getName()
+      @docker.build bundler.getFile(), config.name
 
   run: ->
     @docker.run()

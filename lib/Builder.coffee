@@ -9,7 +9,8 @@ class Builder
 
   buildfile: (file, encoding = 'utf8') ->
     unless file
-      {file, encoding} = config.getBuildFile()
+      file = config.buildFile
+      encoding = config.buildFileEncoding
     readFile path.normalize(file), encoding
     .then (contents) =>
       contents = @_setFrom contents
@@ -17,14 +18,14 @@ class Builder
       contents
 
   _setFrom: (contents) ->
-    contents.replace /^FROM\s.*/g, "FROM #{config.getContainerImage()}"
+    contents.replace /^FROM\s.*/g, "FROM #{config.containerImage}"
 
   # Add ENV vars to buildfile contents
   _setEnv: (contents) ->
     # Set meta env vars
     # https://github.com/airstack/docs/blob/master/README.md#environment-variables
     env =
-      COMPONENT_NAME: config.getName().toUpperCase()
+      COMPONENT_NAME: config.name.toUpperCase()
     envFunc = (v, k) ->
       contents += "ENV #{k} \"#{v}\"\n"
     config.forEach 'ENV', envFunc

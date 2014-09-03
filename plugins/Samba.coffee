@@ -21,7 +21,7 @@ class Samba extends Process
   _cmd: 'smbd'
   # Run in interactive mode since node is piping stdout and stderr to files
   # http://www.samba.org/samba/docs/man/manpages/smbd.8.html
-  _args: ['-F', '-S', '--no-process-group', '--debuglevel=1', "--configfile=#{config.getConfigFile(CONFIGFILE)}"]
+  _args: ['-F', '-S', '--no-process-group', '--debuglevel=1', "--configfile=#{path.join config.configDir, CONFIGFILE}"]
   _configFile: CONFIGFILE
 
   _mountTpl: """
@@ -39,7 +39,7 @@ class Samba extends Process
     fsReadFile @getConfigFile()
     .then (conf) =>
       @_ini = new Ini conf.toString()
-      @initMounts config.getMounts()
+      @initMounts config.mounts
     .then =>
       @updateConfig()
     .then =>
@@ -55,7 +55,7 @@ class Samba extends Process
         m = _.compact m.split path.sep
         m = if m.length then "__#{m.join '-'}" else ''
         {
-          name: "#{config.getName()}_#{config.uuid}#{m}"
+          name: "#{config.name}_#{config.uuid}#{m}"
           path: mountPath
         }
       ).bind null, mountPath

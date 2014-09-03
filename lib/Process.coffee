@@ -106,7 +106,7 @@ class Process
     ps.killAll @_fullCmd, 'SIGHUP'
 
   getConfigFile: ->
-    @_configFilePath ?= config.getConfigFile @_configFile
+    @_configFilePath ?= path.join config.configDir, @_configFile
 
   # Initialize config file if @configFile is present.
   initConfig: ->
@@ -118,7 +118,7 @@ class Process
       return true  if configExists
       src = path.join __dirname, '../config', @_configFile
       log.debug '[ init ]'.grey, "Copying #{src} to #{conf}"
-      utils.fs.mkdir config.getConfigDir()
+      utils.fs.mkdir config.configDir
       .then ->
         ps.exec "cp #{src} #{conf}", timeout: 100
       .spread (stdout, stderr) ->
@@ -130,7 +130,7 @@ class Process
   # http://stackoverflow.com/questions/11403953/winston-how-to-rotate-logs
   initLogs: ->
     return Promise.resolve()  if @stdout and @stderr
-    dir = config.getLogDir @_cmd
+    dir = path.join config.logDir, @_cmd
     @_logFiles.stdout = path.join dir, 'stdout.log'  unless @_logFiles.stdout
     @_logFiles.stderr = path.join dir, 'stderr.log'  unless @_logFiles.stderr
     utils.fs.mkdir dir

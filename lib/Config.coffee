@@ -34,7 +34,39 @@ class Config
 
   constructor: ->
     @_config = @_defaults
+    @_cache = {}
     @uuid = uuid.v1()
+
+  # Getters/Setters
+  Object.defineProperties @prototype,
+    name:
+      get: -> @_config.name
+    buildFile:
+      get: ->
+        @_config.container.build
+    buildFileEncoding:
+      get: ->
+        @_config.container.encoding
+    mounts:
+      get: -> @_config.mount
+    env:
+      get: -> @_config.ENV
+    APP_ENV:
+      get: -> @_config.ENV.APP_ENV
+    development:
+      get: -> @APP_ENV == 'development'
+    containerImage:
+      # TODO: resolve semantic version and add version tag
+      get: -> @_config.container.image + ':latest'
+    configDir:
+      get: -> @_cache.configDir ?= @getDir 'config'
+    tmpDir:
+      get: -> @_cache.tmpDir ?= @getDir 'tmp'
+    dataDir:
+      get: -> @_cache.dataDir ?= @getDir 'data'
+    logDir:
+      get: -> @_cache.logDir ?= @getDir 'log'
+
 
   init: (config = {}) ->
     clone = _.cloneDeep config
@@ -44,45 +76,10 @@ class Config
 
   reset: ->
     @_config = @_defaults
+    @_cache = {}
 
-  getName: ->
-    @_config.name
-
-  getBuildFile: ->
-    {
-      file: @_config.container.build
-      encoding: @_config.container.encoding
-      toString: ->
-        @file
-    }
-
-  getMounts: ->
-    @_config.mount
-
-  getENV: ->
-    @_config.ENV.APP_ENV
-
-  getContainerImage: ->
-    # TODO: resolve semantic version and add version tag
-    @_config.container.image
-
-  getTmpDir: (app = '') ->
-    @getDir 'tmp', app
-
-  getLogDir: (app = '') ->
-    @getDir 'log', app
-
-  getDataDir: (app = '') ->
-    @getDir 'data', app
-
-  getConfigDir: ->
-    @getDir 'config'
-
-  getConfigFile: (file) ->
-    path.join @getConfigDir(), file
-
-  getDir: (pathname, app = '') ->
-    path.resolve @_config.paths.base, @_config.paths[pathname], app
+  getDir: (pathname) ->
+    path.resolve @_config.paths.base, @_config.paths[pathname]
 
   normalizePaths: ->
     base = @_config.paths.base

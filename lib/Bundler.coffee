@@ -15,7 +15,7 @@ class Bundler
     tarFile: "docker_#{(new Date).getTime()}_#{utils.string.random 5}.tar"
 
   constructor: ->
-    @_tarFile = path.join config.getTmpDir(), @defaults.tarFile
+    @_tarFile = path.join config.tmpDir, @defaults.tarFile
     @_tape = null
 
   getFile: ->
