@@ -1,13 +1,13 @@
 // Usage: sudo node syslog.js
 
-// works with sudo ...
+// works with sudo for port 514 or non-sudo with 1514 ...
 // var dockerIP = '0.0.0.0';
 var dockerIP = '192.168.59.3'; // vbox net
 
 // does not work ...
 // var dockerIP = '192.168.59.103'; // boot2docker ip
 
-var port = 514;
+var port = 1514;
 
 var syslogParser = require('glossy').Parse; // or wherever your glossy libs are
 var dgram  = require("dgram");
