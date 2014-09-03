@@ -105,7 +105,7 @@ make build
 # Installation
 
 ```bash
-git clone git@github.com:airstackio/cli.git
+git clone git@github.com:airstack/cli.git
 cd cli
 npm install
 npm link

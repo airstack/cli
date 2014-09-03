@@ -14,7 +14,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/airstackio/cli.git"
+    "url": "git://github.com/airstack/cli.git"
   },
   "keywords": [
     "airstack"
@@ -22,9 +22,9 @@
   "author": "Joe Johnston <joe@simple10.com> (http://simple10.com/)",
   "license": "Apache 2.0",
   "bugs": {
-    "url": "https://github.com/airstackio/cli/issues"
+    "url": "https://github.com/airstack/cli/issues"
   },
-  "homepage": "https://github.com/airstackio/cli",
+  "homepage": "https://github.com/airstack/cli",
   "dependencies": {
     "bluebird": "^2.2.2",
     "charm": "^0.2.0",
