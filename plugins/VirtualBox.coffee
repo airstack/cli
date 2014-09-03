@@ -22,21 +22,20 @@ class VirtualBox extends VirtualMachine
     info: 'boot2docker info'
 
   constructor: ->
-    @_state = null
-    @_info = null
+    @_info = {}
     @_ip = null
 
-  isRunning: ->
-    @_state == 'running'
-
-  getState: ->
-    @_info.State
-
-  getDockerIP: ->
-    @_ip
-
-  getDockerPort: ->
-    @_info.DockerPort
+  # Getters/Setters
+  Object.defineProperties @prototype,
+    running:
+      get: -> @state == 'running'
+    state:
+      get: -> @_info.State
+      set: (state) -> @_state = state
+    dockerIP:
+      get: -> @_ip
+    dockerPort:
+      get: -> @_info.DockerPort
 
   # Get info and ip, return info
   info: ->
@@ -51,7 +50,7 @@ class VirtualBox extends VirtualMachine
         @_info = JSON.parse "#{stdout}".trim()
       catch e
         @_info = {}
-      @_state = @_info.State
+      @state = @_info.State
       @_info
     .catch (err) =>
       @_info = {}
@@ -73,7 +72,7 @@ class VirtualBox extends VirtualMachine
   up: ->
     @info()
     .then =>
-      @_startVM()  unless @isRunning()
+      @_startVM()  unless @running
 
   down: ->
     ps.spawn @cmd.down
@@ -81,7 +80,7 @@ class VirtualBox extends VirtualMachine
   status: ->
     @info()
     .then =>
-      @getState()
+      @state
 
   upgrade: ->
     # http://docs.docker.com/installation/mac/

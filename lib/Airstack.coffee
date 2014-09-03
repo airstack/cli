@@ -70,7 +70,7 @@ class Airstack
         @i + j
       obj
     data.push
-      boot2docker: ['', '', '', @vm.getState() or '', @vm.getDockerIP() or '', @vm.getDockerPort() or '', '', '']
+      boot2docker: ['', '', '', @vm.state or '', @vm.dockerIP or '', @vm.dockerPort or '', '', '']
     charm.position 0, 0
     charm.write @_statusTable.render data
     charm.write "\n"

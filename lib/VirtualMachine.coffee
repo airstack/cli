@@ -2,15 +2,14 @@
 
 
 class VirtualMachine
-
-  isRunning: ->
-
   # Getters
-  getState: ->
-  getDockerIP: ->
-  getDockerPort: ->
+  running: null
+  state: null
+  dockerIP: null
+  dockerPort: null
 
-  # Returns promise
+  # Functions
+  # @return Promise
   info: ->
   up: ->
   status: ->

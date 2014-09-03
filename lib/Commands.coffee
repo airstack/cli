@@ -18,15 +18,15 @@ class Commands
   constructor: (opts) ->
     @vm = opts.vm
 
-  # getters/setters
+  # Getters/Setters
   Object.defineProperties @prototype,
     samba:
       get: -> @_samba ?= new Samba
     docker:
       get: ->
         return @_docker  if @_docker
-        ip = @vm.getDockerIP()
-        port = @vm.getDockerPort()
+        ip = @vm.dockerIP
+        port = @vm.dockerPort
         if ip and port
           @_docker = new Docker host: ip, port: port, protocol: 'http'
         else
@@ -66,7 +66,7 @@ class Commands
       return
     builder = new Builder
     bundler = new Bundler
-    dockerURL = "http://#{@vm.getDockerIP()}:#{@vm.getDockerPort()}"
+    dockerURL = "http://#{@vm.dockerIP}:#{@vm.dockerPort}"
     builder.buildfile()
     .then (dockerfile) =>
       log.debug 'Dockerfile:'.bold, "\n", dockerfile
