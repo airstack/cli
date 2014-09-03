@@ -1,5 +1,5 @@
-VirtualBox = require '../../plugins/VirtualBox'
-expect = require('../helpers/Common').expect
+VirtualBox = require '../../../plugins/VirtualBox'
+expect = require('../../helpers/Common').expect
 
 
 describe 'VirtualBox', ->

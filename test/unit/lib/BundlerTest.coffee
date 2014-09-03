@@ -1,6 +1,6 @@
-Bundler = require '../lib/Bundler'
-expect = require('./helpers/Common').expect
-utils = require '../lib/utils'
+Bundler = require '../../../lib/Bundler'
+utils = require '../../../lib/utils'
+expect = require('../../helpers/Common').expect
 
 describe 'Bundler', ->
 

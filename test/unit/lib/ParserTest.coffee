@@ -1,9 +1,9 @@
-Parser = require '../lib/Parser'
-expect = require('./helpers/Common').expect
+Parser = require '../../../lib/Parser'
+expect = require('../../helpers/Common').expect
 path = require 'path'
 
-yamlFile = path.resolve __dirname, '../.airstack.yml'
-badFile = path.resolve __dirname, '../.SOME_FILE_THAT_DOES_NOT_EXIST.yml'
+yamlFile = path.resolve __dirname, '../../../.airstack.yml'
+badFile = path.resolve __dirname, './.SOME_FILE_THAT_DOES_NOT_EXIST.yml'
 
 
 describe 'Parser', ->

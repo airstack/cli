@@ -1,5 +1,5 @@
-config = require '../lib/Config'
-expect = require('./helpers/Common').expect
+config = require '../../../lib/Config'
+expect = require('../../helpers/Common').expect
 os = require 'os'
 path = require 'path'
 

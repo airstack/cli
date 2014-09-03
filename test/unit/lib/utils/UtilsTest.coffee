@@ -1,5 +1,5 @@
-utils = require '../../lib/utils'
-expect = require('../helpers/Common').expect
+utils = require '../../../../lib/utils'
+expect = require('../../../helpers/Common').expect
 
 
 describe 'utils', ->
