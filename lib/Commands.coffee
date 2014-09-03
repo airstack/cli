@@ -14,12 +14,24 @@ class Commands
   ip: null
   # Airstack config instance
   config: null
-  # Dockerode instance
-  docker: null
 
   constructor: (opts) ->
     @vm = opts.vm
-    @samba = new Samba
+
+  # getters/setters
+  Object.defineProperties @prototype,
+    samba:
+      get: -> @_samba ?= new Samba
+    docker:
+      get: ->
+        return @_docker  if @_docker
+        ip = @vm.getDockerIP()
+        port = @vm.getDockerPort()
+        if ip and port
+          @_docker = new Docker host: ip, port: port, protocol: 'http'
+        else
+          @_docker = null
+          throw 'Invalid Docker address'
 
   # load .airstack.yml
   # make sure docker is ready; start boot2docker if needed
@@ -52,8 +64,6 @@ class Commands
     unless config.getBuildFile().file
       log.debug '[build]'.grey, 'skipping build step: no Dockerfile specified'
       return
-    throw 'Invalid Docker address'  unless @vm.getDockerIP() and @vm.getDockerPort()
-    docker = new Docker host: "http://#{@vm.getDockerIP()}", port: @vm.getDockerPort()
     builder = new Builder
     bundler = new Bundler
     dockerURL = "http://#{@vm.getDockerIP()}:#{@vm.getDockerPort()}"
@@ -64,15 +74,16 @@ class Commands
       bundler.append 'Dockerfile', dockerfile
     .then ->
       bundler.close()
-    .then ->
+    .then =>
       log.debug 'Sending Docker.tar:'.grey, dockerURL
-      docker.build bundler.getFile(), config.getName()
+      @docker.build bundler.getFile(), config.getName()
 
   run: ->
-    log.error 'Need to implement run'
+    @docker.run()
 
   cleanup: ->
     @samba.kill()
+    # @docker.cleanup()
 
 module.exports = Commands
 
