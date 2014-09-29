@@ -37,7 +37,6 @@
     "node-uuid": "^1.4.1",
     "pidusage": "^0.0.7",
     "should": "^4.0.4",
-    "tar-async": "^1.2.0",
     "winston": "^0.7.3"
   },
   "devDependencies": {
