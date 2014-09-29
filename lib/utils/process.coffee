@@ -49,7 +49,7 @@ module.exports =
   exec(cmd, opts).spread (stdout, stderr) ->
   ###
   exec: (cmd, opts = {}) ->
-    @_execDefaults cmd, opts
+    Process._execDefaults cmd, opts
     log.debug "[exec]".grey, cmd
     exec cmd, opts
     .spread (stdout, stderr) ->
@@ -66,7 +66,7 @@ module.exports =
       opts = args
       args = cmd[1]
       cmd = cmd[0]
-    @_execDefaults cmd, opts
+    Process._execDefaults cmd, opts
     _data = ''
     _error = ''
     # todo: use cancellable and timeout
@@ -107,9 +107,9 @@ module.exports =
     _.defaults opts,
       timeout: 100
       oldest: false
-      data: @output.silent
+      data: Process.output.silent
     flags = if opts.oldest then '-o' else ''
-    @exec "pgrep #{flags} -d ',' -f #{cmd}", opts
+    Process.exec "pgrep #{flags} -d ',' -f #{cmd}", opts
     .spread (stdout, stderr) =>
       pids = stdout.trim().split(',').map (pid) ->
         parseInt pid
@@ -130,9 +130,9 @@ module.exports =
 
 
   killAll: (cmd, signal = 'SIGTERM', opts = {}) ->
-    @pgrep cmd, opts
+    Process.pgrep cmd, opts
     .then (pids) =>
-      @kill pid, signal for pid in pids
+      Process.kill pid, signal for pid in pids
 
 
   stats: (cmd) ->
