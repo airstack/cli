@@ -3,102 +3,96 @@ utils = require './utils'
 os = require 'os'
 path = require 'path'
 _ = require 'lodash'
+_.defaults = require('./utils/object').deepDefaults
 uuid = require 'node-uuid'
 
-# HOMEPATH and USERPROFILE are win32
-HOMEDIR = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE
-
-INSTALLDIR = path.join HOMEDIR, '.airstack'
+AIRSTACK_HOME = process.env.AIRSTACK_HOME
+unless AIRSTACK_HOME
+  # HOMEPATH and USERPROFILE are win32
+  AIRSTACK_HOME = path.join process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE, '.airstack'
 
 
 class Config
+  # Current environment name: development, test, etc.
+  environment: null
+
   _defaults:
-    name: 'app'
-    container:
-      encoding: 'utf8'
-    scripts: {}
-    components: []
-    ENV:
-      APP_ENV: 'development'
-    # Paths are relative to paths.base or absolute
     paths:
-      base: INSTALLDIR
-      log: 'log'
-      data: 'data'
-      # Create random dir inside of OS tmp dir
-      tmp: utils.fs.randomTmpDir()
-      # Set config path to absolute path in case base is changed.
-      # It's best if config files are universal for an Airstack install.
-      # Only one of Samba, VirtualBox, etc. can be running at a time.
-      config: path.join INSTALLDIR, 'config'
+      airstack:
+        home: AIRSTACK_HOME
+        log: 'log'
+        data: 'data'
+        # Create random dir inside of OS tmp dir
+        tmp: utils.fs.randomTmpDir()
+        # Set config path to absolute path in case base is changed.
+        # It's best if config files are universal for an Airstack install.
+        # Only one of Samba, VirtualBox, etc. can be running at a time.
+        config: 'config'
+        # Default location to mount dirs in container if not specified in mount
+        mount: '/home/airstack/mount/'
+        bootstrap: 'package/airstack/bootstrap/'
 
   constructor: ->
-    @_config = @_defaults
-    @_cache = {}
-    @uuid = uuid.v1()
+    @reset()
 
-  # Getters/Setters
-  Object.defineProperties @prototype,
-    name:
-      get: -> @_config.name
-    buildFile:
-      get: ->
-        @_config.container.build
-    buildFileEncoding:
-      get: ->
-        @_config.container.encoding
-    mounts:
-      get: -> @_config.mount
-    env:
-      get: -> @_config.ENV
-    APP_ENV:
-      get: -> @_config.ENV.APP_ENV
-    development:
-      get: -> @APP_ENV == 'development'
-    containerImage:
-      # TODO: resolve semantic version and add version tag
-      get: -> @_config.container.image + ':latest'
-    configDir:
-      get: -> @_cache.configDir ?= @getDir 'config'
-    tmpDir:
-      get: -> @_cache.tmpDir ?= @getDir 'tmp'
-    dataDir:
-      get: -> @_cache.dataDir ?= @getDir 'data'
-    logDir:
-      get: -> @_cache.logDir ?= @getDir 'log'
+  init: (config = {}, environment) ->
+    @_config = _.cloneDeep config
+    for k,v of @_config
+      continue unless k[0] is ':'
+      e = k.slice(1)
+      v.environment = e
+      @_environments[e] = v
+      delete @_config[k]
+    _.defaults @_config, @_defaults
+    @_initPaths @_config.paths
+    for k,v of @_environments
+      @_initPaths v.paths  if v.paths?
+      _.defaults v, @_config
+    @_config.environment = environment
+    @config = @_environments[environment] or @_config
+    log.error '!!!! config:', @config
+    @config
 
+    unless @config.name?
+      throw 'Invalid config: name must be defined'
 
-  init: (config = {}) ->
-    clone = _.cloneDeep config
-    utils.defaults clone, @_defaults
-    @_config = clone
-    @normalizePaths()
+  _initPaths: (paths) ->
+    home = paths.airstack.home
+    for k,v of paths.airstack
+      paths.airstack[k] = path.resolve home, v
+
+  _initMounts: ->
+    @_mounts = for m in @config.mount
+      [fromPath, toPath] = m.split ':'
+      # Convert absolute paths; this really should not be needed
+      name = path.relative process.cwd(), fromPath
+      # Strip parent directories and normalize path
+      name = path.normalize name.replace(/\.\./g, '')
+      name = _.compact name.split path.sep
+      name = if name.length then "__#{name.join '-'}" else ''
+      {
+        name: "#{@config.name}_#{@uuid}#{name}"
+        from: fromPath
+        to: toPath or "#{@config.paths.airstack.mount}#{name}"
+      }
 
   reset: ->
-    @_config = @_defaults
-    @_cache = {}
-
-  getDir: (pathname) ->
-    path.resolve @_config.paths.base, @_config.paths[pathname]
-
-  normalizePaths: ->
-    base = @_config.paths.base
-    if base[0] is '~'
-      @_config.paths.base = path.join HOMEDIR, base.slice(1)
+    @_config = {}
+    @_environments = {}
+    @uuid = uuid.v1()
 
   # Iterate over config collections.
   # Example: config.forEach('ENV', (k, v) ->)
   forEach: (key, func) ->
-    prop = @_config[key]
+    prop = @config[key]
     method = if _.isObject(prop) then 'forIn' else 'forEach'
     _[method](prop, func)
 
   toString: (padding) ->
-    JSON.stringify @_config, null, padding
+    JSON.stringify @config, null, padding
 
   # console.log calls inspect
   inspect: ->
     @toString '  '
 
-# singleton
-module.exports = new Config
+module.exports = Config
