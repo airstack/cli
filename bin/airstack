@@ -1,0 +1,3 @@
+#!/bin/sh -e
+
+exec $AIRSTACK_HOME/package/nodejs/node --harmony $AIRSTACK_HOME/package/airstack/cli/bin/cli.js $@
