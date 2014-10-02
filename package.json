@@ -7,7 +7,7 @@
     "node": "0.10.32"
   },
   "bin": {
-    "air": "bin/airstack.js"
+    "airstack": "bin/airstack"
   },
   "scripts": {
     "test": "mocha"
