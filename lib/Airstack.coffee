@@ -1,7 +1,7 @@
-config = require './Config'
+Config = require './Config'
 cli = require './Cli'
 log = require './Logger'
-Parser = require './Parser'
+ConfigParser = require './ConfigParser'
 Commands = require './Commands'
 VirtualMachine = require './VirtualMachine'
 Promise = require 'bluebird'
@@ -11,18 +11,23 @@ _ = require 'lodash'
 
 
 class Airstack
-  configFile: '.airstack.yml'
+  configFile: 'airstack.yml'
   updateStatsInterval: 1500
 
   constructor: ->
-    cmd = cli.command()
+    @config = new Config
+    @init()
+
+  init: ->
+    cmd = cli.command
     log.debug 'Command:'.bold, cmd
     Promise.all [
       @loadConfig()
       @createVM()
     ]
     .then =>
-      @run cmd
+      @commands = new Commands config: @config.config, vm: @vm
+      @commands[cmd] cli
     .then =>
       if cmd is 'up'
         @watch()
@@ -30,17 +35,10 @@ class Airstack
         _.defer process.exit
 
   loadConfig: ->
-    Parser.loadYaml @configFile
-    .then (yaml) =>
-      config.init yaml
-
-  run: (cmd) ->
-    @cmd ?= new Commands vm: @vm
-    opts = cli.opts()
-    switch cmd
-      when 'up' then @cmd.up opts
-      when 'down' then @cmd.down opts
-      else cli.help()
+    ConfigParser.load @configFile
+    .then (yamljs) =>
+      @config.init yamljs, cli.options.env
+      log.debug 'config', @config.config
 
   watch: ->
     charm.removeAllListeners '^C'
@@ -49,7 +47,7 @@ class Airstack
       charm.reset()
       # todo: move cmd.cleanup to own function and listen for process exit
       # currently cmd.clienup will not be executed if user ^c quickly on air up
-      @cmd.cleanup()
+      @commands.cleanup()
       .then ->
         _.defer process.exit
     # Clear the screen while keeping log data after exit

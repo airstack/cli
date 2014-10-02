@@ -6,20 +6,10 @@ cli = require 'cli'
 
 class Cli
   constructor: ->
-    @_parse()
-
-  _parse: ->
-    cli.parse null, ['up', 'down', 'deploy', 'fetch']
-    @
-
-  command: ->
-    cli.command
-
-  opts: ->
-    {
-      args: cli.args
-      options: cli.options
-    }
+    cli.parse null, ['up', 'down', 'build']
+    @options = cli.options
+    @args = cli.args
+    @command = cli.command
 
 # singleton
 module.exports = new Cli

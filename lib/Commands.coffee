@@ -1,7 +1,5 @@
-config = require './Config'
 Builder = require './Builder'
 Docker = require './Docker'
-Bundler = require './Bundler'
 log = require './Logger'
 Promise = require 'bluebird'
 Samba = require '../plugins/Samba'
@@ -16,17 +14,18 @@ class Commands
   config: null
 
   constructor: (opts) ->
-    @vm = opts.vm
+    {@vm, @config} = opts
 
   # Getters/Setters
   Object.defineProperties @prototype,
     samba:
-      get: -> @_samba ?= new Samba
+      get: -> @_samba ?= new Samba config: @config
     docker:
       get: ->
         return @_docker  if @_docker
         ip = @vm.dockerIP
         port = @vm.dockerPort
+        log.error "#{ip} #{port}"
         if ip and port
           @_docker = new Docker host: ip, port: port, protocol: 'http'
         else
@@ -61,22 +60,11 @@ class Commands
       log.info '[ DONE ]'.grey
 
   build: ->
-    unless config.buildFile
-      log.debug '[build]'.grey, 'skipping build step: no Dockerfile specified'
-      return
-    builder = new Builder
-    bundler = new Bundler
-    dockerURL = "http://#{@vm.dockerIP}:#{@vm.dockerPort}"
-    builder.buildfile()
-    .then (dockerfile) =>
-      log.debug 'Dockerfile:'.bold, "\n", dockerfile
-      log.debug 'Docker.tar:'.grey, bundler.getFile()
-      bundler.append 'Dockerfile', dockerfile
-    .then ->
-      bundler.close()
-    .then =>
-      log.debug 'Sending Docker.tar:'.grey, dockerURL
-      @docker.build bundler.getFile(), config.name
+    # unless config.buildFile
+    #   log.debug '[build]'.grey, 'skipping build step: no Dockerfile specified'
+    #   return
+    builder = new Builder config: @config
+    builder.build()
 
   run: ->
     @docker.run()
@@ -84,6 +72,13 @@ class Commands
   cleanup: ->
     @samba.kill()
     # @docker.cleanup()
+    # IDEA: instead of specific cleanup calls, use "stop" event.
+    #   A process responding to a stop event should remove itself as a listener when it's done.
+    #   Exit after all stop listeners have been removed.
+    #   Pros: keeps code more modular
+    #   Cons: harder to control order of stop events if needed
+
+    # Optimization: spawn a process that does the cleanup steps; useful for immediate exit; does this break unix philosophy?
 
 module.exports = Commands
 
