@@ -17,6 +17,7 @@ class Config
   environment: null
 
   _defaults:
+    environment: 'development'
     paths:
       airstack:
         home: AIRSTACK_HOME
@@ -35,7 +36,7 @@ class Config
   constructor: ->
     @reset()
 
-  init: (config = {}, environment) ->
+  init: (config = {}, environment = @_defaults.environment) ->
     @_config = _.cloneDeep config
     for k,v of @_config
       continue unless k[0] is ':'
