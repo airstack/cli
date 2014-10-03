@@ -11,8 +11,13 @@ class Make
       "#{path.join config.paths.airstack.bootstrap, 'Makefile'}"
       target
     ]
-    _.defaults opts, env: @env(config)
-    log.debug 'make ENV:', opts
+    _.defaults opts,
+      env: @env config
+      stdout: (data) ->
+        process.stdout.write data
+      stderr: (data) ->
+        process.stderr.write data
+    log.debug 'make env:', opts
     spawn 'make', args, opts
 
   env: (config) ->
