@@ -49,6 +49,10 @@ class Commands
     log.debug 'config', config
     @make.make 'build', config
 
+  build_all: ->
+    for k,config of @_config.environments
+      @build config
+
   console: ->
     @make.make 'console', @config,
       env:
