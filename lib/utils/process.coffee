@@ -7,11 +7,11 @@ path = require 'path'
 _ = require 'lodash'
 
 
-module.exports =
+module.exports = UtilsProcess =
   ###*
-  @param {Array} cmds  Array of string or array commands.
-                       String commands will use process.exec.
-                       Array commands will use process.spawn.
+  # @param {Array} cmds  Array of string or array commands.
+  #                      String commands will use process.exec.
+  #                      Array commands will use process.spawn.
   ###
   # runCmds: (cmds, opts = {}) ->
   #   _.defaults opts,
@@ -40,9 +40,10 @@ module.exports =
       log.debug type, msg.toString().trim()  if msg
       msg
     _.defaults opts,
-      data: debug.bind null, "#{cmd} stdout >>".grey
-      error: debug.bind null, '#{cmd} stderr >>'.grey
+      stdout: debug.bind null, "#{cmd} stdout >>".grey
+      stderr: debug.bind null, '#{cmd} stderr >>'.grey
       timeout: 1000
+
 
   ###*
   @return Promise
@@ -50,12 +51,12 @@ module.exports =
   exec(cmd, opts).spread (stdout, stderr) ->
   ###
   exec: (cmd, opts = {}) ->
-    Process._execDefaults cmd, opts
+    UtilsProcess._execDefaults cmd, opts
     log.debug "[exec]".grey, cmd
     exec cmd, opts
     .spread (stdout, stderr) ->
-      opts.data stdout
-      opts.error stderr
+      opts.stdout stdout
+      opts.stderr stderr
       [stdout, stderr]
 
   ###*
@@ -67,9 +68,9 @@ module.exports =
       opts = args
       args = cmd[1]
       cmd = cmd[0]
-    Process._execDefaults cmd, opts
-    _data = ''
-    _error = ''
+    UtilsProcess._execDefaults cmd, opts
+    _stdout = ''
+    _stderr = ''
     # todo: use cancellable and timeout
     new Promise (resolve, reject) ->
       log.debug "[spawn]".grey, "#{cmd} #{args.join ' '}"
@@ -80,14 +81,12 @@ module.exports =
         resolve pid: pid
       else
         proc.stdout.on 'data', (data) ->
-          _data += opts.data data
+          _stdout += opts.stdout data
         proc.stderr.on 'data', (data) ->
-          _error += opts.error data
+          _stderr += opts.stderr data
         proc.on 'exit', (code) ->
-          if code is 0
-            resolve data: _data, error: _error, code: code
-          else
-            reject data: _data, error: _error, code: code
+          ret = stdout: _stdout, stderr: _stderr, code: code
+          code is 0 and resolve(ret) or reject(ret)
 
   # Use with spawn streams to handle output
   output:
@@ -108,9 +107,9 @@ module.exports =
     _.defaults opts,
       timeout: 100
       oldest: false
-      data: Process.output.silent
+      stdout: UtilsProcess.output.silent
     flags = if opts.oldest then '-o' else ''
-    Process.exec "pgrep #{flags} -d ',' -f #{cmd}", opts
+    UtilsProcess.exec "pgrep #{flags} -d ',' -f #{cmd}", opts
     .spread (stdout, stderr) =>
       pids = stdout.trim().split(',').map (pid) ->
         parseInt pid
@@ -131,9 +130,9 @@ module.exports =
 
 
   killAll: (cmd, signal = 'SIGTERM', opts = {}) ->
-    Process.pgrep cmd, opts
+    UtilsProcess.pgrep cmd, opts
     .then (pids) =>
-      Process.kill pid, signal for pid in pids
+      UtilsProcess.kill pid, signal for pid in pids
 
 
   stats: (cmd, opts = {}) ->
