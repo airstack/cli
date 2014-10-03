@@ -1,3 +1,9 @@
+!!!!!!!!!!!!!!!!!!!!
+This file is an OLD WIP.
+See airstack/core/airstack.yml for a working version.
+!!!!!!!!!!!!!!!!!!!!
+
+
 # Example .airstack.yml file
 #
 # Typically, the .airstack.yml file will reside in an app's root dir and be committed to git.
@@ -16,26 +22,35 @@
 # and setting up special user permissions.
 #
 
-name: airstack-blog
+name: airstack/blog
+version: latest
 
 # Number of app containers to start
 instances: 1
 
+environment: development
+
+# example tag: 0.10.31~development~0.1~e123123
+# primary version ~ environment ~ build hash
+airstack/nodejs: development
+
 # Container definition
 container:
-  image: airstack/nodejs
-  version: ^0.10
-  # Optional build file.
+  from:
+    image: airstack/nodejs
+    version: ^0.10
+  # Optional build file and build file encoding
   # build: ./defaults/Dockerfile
-  encoding: utf8
+  # encoding: utf8
 
-# Directory to bind mount into the container.
+# Directories to bind mount into the container.
 # Will be mounted in the base container user's home dir and
 # symlinked into /home/airstack. This allows the airstack user to ssh
 # into the container and see all the relevant mounts and data.
 mount:
   - ./
   - ./defaults
+  - ./config:/package/airstack/cli/config
 
 scripts:
   # Automatically run start scripts on `air up`
@@ -73,6 +88,7 @@ ENV:
   # Used to determine ~/.airstack/ mount paths and other core actions.
   # Each base container should inspect APP_ENV on start up and set other
   # env vars as needed; e.g. NODE_ENV, RACK_ENV, etc.
+  # TODO: automatically set APP_ENV from root.environment
   APP_ENV: development
 
   SOME_APP_ENV_STUFF: asdfasdfasdf
