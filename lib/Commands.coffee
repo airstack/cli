@@ -65,6 +65,15 @@ class Commands
     #   return
     builder = new Builder config: @config
     builder.build()
+  console: ->
+    @make.make 'console',
+      env:
+        # Echo commands that start a terminal to stdout for capture
+        # See bin/airstack
+        TERM: 'printf "EXEC::%s" '
+    .then (a, b) =>
+      process.stdout.write a.data
+      process.exit 2
 
   run: ->
     @docker.run()

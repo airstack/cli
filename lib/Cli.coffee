@@ -6,7 +6,7 @@ cli = require 'cli'
 
 class Cli
   constructor: ->
-    cli.parse null, ['up', 'down', 'build']
+    cli.parse null, ['up', 'down', 'build', 'console']
     @options = cli.options
     @args = cli.args
     @command = cli.command
