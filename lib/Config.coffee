@@ -41,6 +41,7 @@ class Config
     for k,v of @_config
       continue unless k[0] is ':'
       e = k.slice(1)
+      v ?= {}
       v.environment = e
       @_environments[e] = v
       delete @_config[k]
