@@ -15,6 +15,8 @@ class Commands
   config: null
 
   constructor: (opts) ->
+    {@vm, @_config} = opts
+    @config = @_config.config
     @make = new Make
 
   # Getters/Setters

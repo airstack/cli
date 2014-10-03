@@ -9,17 +9,16 @@ charm = require('charm')(process)
 StatusTable = require './StatusTable'
 _ = require 'lodash'
 
-
 class Airstack
   configFile: 'airstack.yml'
   updateStatsInterval: 1500
 
   constructor: ->
-    @config = new Config
+    @_config = new Config
     @init()
 
   init: ->
-    @cli = new Cli config: @config
+    @cli = new Cli
     cmd = @cli.command
     log.debug 'Command:'.bold, cmd
     Promise.all [
@@ -27,8 +26,8 @@ class Airstack
       @createVM()
     ]
     .then =>
-      @commands = new Commands config: @config.config, vm: @vm
-      @commands[cmd] @cli
+      @commands = new Commands _config: @_config, vm: @vm
+      @commands[cmd.replace '-', '_'] @cli
     .then =>
       if cmd is 'up'
         @watch()
@@ -38,8 +37,8 @@ class Airstack
   loadConfig: ->
     ConfigParser.load @configFile
     .then (yamljs) =>
-      @config.init yamljs, @cli.options.env
-      log.debug 'config', @config.config
+      @_config.init yamljs, @cli.options.env
+      log.debug 'config', @_config.config
 
   watch: ->
     charm.removeAllListeners '^C'
@@ -47,7 +46,7 @@ class Airstack
       clearInterval @_watchInterval
       charm.reset()
       # todo: move cmd.cleanup to own function and listen for process exit
-      # currently cmd.clienup will not be executed if user ^c quickly on air up
+      # currently cmd.cleanup will not be executed if user ^c quickly on air up
       @commands.cleanup()
       .then ->
         _.defer process.exit
