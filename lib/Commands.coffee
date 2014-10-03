@@ -1,5 +1,6 @@
-Builder = require './Builder'
-Docker = require './Docker'
+# Builder = require './Builder'
+# Docker = require './Docker'
+Make = require '../plugins/Make'
 log = require './Logger'
 Promise = require 'bluebird'
 Samba = require '../plugins/Samba'
@@ -15,29 +16,13 @@ class Commands
 
   constructor: (opts) ->
     {@vm, @config} = opts
+    @make = new Make config: @config
 
   # Getters/Setters
   Object.defineProperties @prototype,
     samba:
       get: -> @_samba ?= new Samba config: @config
-    docker:
-      get: ->
-        return @_docker  if @_docker
-        ip = @vm.dockerIP
-        port = @vm.dockerPort
-        log.error "#{ip} #{port}"
-        if ip and port
-          @_docker = new Docker host: ip, port: port, protocol: 'http'
-        else
-          @_docker = null
-          throw 'Invalid Docker address'
 
-  # load .airstack.yml
-  # make sure docker is ready; start boot2docker if needed
-  # bundle Dockerfile, init scripts, and any other files into tar
-  # send tar to Docker API build
-  # send run cmd to Docker API
-  # echo out ip address and port of app container
   up: ->
     Promise.all [
       @samba.up()
@@ -60,23 +45,19 @@ class Commands
       log.info '[ DONE ]'.grey
 
   build: ->
-    # unless config.buildFile
-    #   log.debug '[build]'.grey, 'skipping build step: no Dockerfile specified'
-    #   return
-    builder = new Builder config: @config
-    builder.build()
+    log.debug 'config', @config
+    @make.make 'build-image'
+
   console: ->
     @make.make 'console',
       env:
-        # Echo commands that start a terminal to stdout for capture
-        # See bin/airstack
-        TERM: 'printf "EXEC::%s" '
+        TERM: 'printf "EXEC::%s" '  # See bin/airstack
     .then (a, b) =>
       process.stdout.write a.data
       process.exit 2
 
   run: ->
-    @docker.run()
+    # @docker.run()
 
   cleanup: ->
     @samba.kill()

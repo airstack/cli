@@ -17,7 +17,6 @@ describe 'Config', ->
       config.init opts
       # Test to make sure ENV is not globbering defaults
       expect( config.APP_ENV ).to.equal 'development'
-      expect( config.development ).to.be.true
 
     it 'sets APP_ENV', ->
       opts =
@@ -25,7 +24,6 @@ describe 'Config', ->
           APP_ENV: 'production'
       config.init opts
       expect( config.APP_ENV ).to.equal 'production'
-      expect( config.development ).to.be.false
 
   describe '.buildFile', ->
     it 'uses container.build', ->

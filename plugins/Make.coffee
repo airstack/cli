@@ -24,23 +24,15 @@ class Make
           AIRSTACK_BUILD_TEMPLATES_FILES: @config.build.templates.files
           DEBUG_LEVEL: 2
 
-
   make: (target, opts = {}) ->
-    log.error 'config', @config
     args = [
       "-f"
       "#{path.join @config.paths.airstack.bootstrap, 'Makefile'}"
       target
     ]
     _.defaults opts, @env
-    log.error opts
+    log.debug 'make ENV:', opts
     spawn 'make', args, opts
-    .then (a, b) =>
-      log.debug 'a', a
-      log.debug 'b', b
-      # log.debug stdout
-      # log.error stderr
-      # #@docker.build tarfile, @config.imageName
 
 
 
