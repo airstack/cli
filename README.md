@@ -13,6 +13,9 @@
   - X reload samba on conf change
   - clean up smbd.conf on reload
   - truncate smbd logs
+- Tests
+  - test successful startup of container
+  - test file watching on mounted volume in container
 - CLI dashboard
   - output status of host processes: samba, virtualbox, etc.
   - keyboard support for switching between monitor and log view
@@ -60,7 +63,7 @@ For MVP, the CLI focuses on the NodeJS community.
 
 Node >=0.10 is required.
 
-Use 0.10.30 until 0.11 is stable. There seems to be an issue with child_process.exec
+Use 0.10.31+ until 0.11 is stable. There seems to be an issue with child_process.exec
 hanging on 0.11. This issue shows up occasionally when exiting `air up`. The
 pgrep exec will sometimes not return results or timeout properly.
 
@@ -110,8 +113,15 @@ cd cli
 npm install
 npm link
 
+# Install node 0.10.32 to ~/.airstack/package/nodejs
+mkdir -p ~/.airstack/package/nodejs
+cd ~/.airstack/package/nodejs
+wget http://nodejs.org/dist/v0.10.32/node-v0.10.32-darwin-x64.tar.gz
+tar -xzf node-v0.10.32-darwin-x64.tar.gz
+ln -s ~/.airstack/package/nodejs/node-v0.10.32-darwin-x64 node
+
 # Test
-air up
+airstack build
 
 # Or
 air -h
