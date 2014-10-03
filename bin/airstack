@@ -5,7 +5,7 @@ main() {
   local exitcode;
 
   # Run node in background to fix issue with docker not attaching to the terminal after node exits
-  eval $AIRSTACK_HOME/package/nodejs/node --harmony $AIRSTACK_HOME/package/airstack/cli/bin/cli.js $@ > $tempfile &
+  eval $AIRSTACK_HOME/package/nodejs/node/bin/node --harmony $AIRSTACK_HOME/package/airstack/cli/bin/cli.js $@ > $tempfile &
 
   # Wait for each child process to finish
   for job in `jobs -p`; do
