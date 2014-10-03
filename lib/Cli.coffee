@@ -3,12 +3,12 @@
 # https://github.com/chriso/cli
 cli = require 'cli'
 cli_config = require '../config/cli.config'
+path = require 'path'
 
 class Cli
-  constructor: (opts) ->
-    {@config} = opts
+  constructor: ->
+    cli.setApp path.resolve __dirname, '../package.json'
     cli.enable 'version'
-    cli.setApp './package.json'
     cli.parse null, cli_config.commands
     @options = cli.options
     @args = cli.args
