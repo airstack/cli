@@ -15,8 +15,7 @@ class Commands
   config: null
 
   constructor: (opts) ->
-    {@vm, @config} = opts
-    @make = new Make config: @config
+    @make = new Make
 
   # Getters/Setters
   Object.defineProperties @prototype,
@@ -44,12 +43,12 @@ class Commands
     .then ->
       log.info '[ DONE ]'.grey
 
-  build: ->
-    log.debug 'config', @config
-    @make.make 'build-image'
+  build: (config = @config) ->
+    log.debug 'config', config
+    @make.make 'build', config
 
   console: ->
-    @make.make 'console',
+    @make.make 'console', @config,
       env:
         TERM: 'printf "EXEC::%s" '  # See bin/airstack
     .then (a, b) =>
