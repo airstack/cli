@@ -43,17 +43,15 @@ class Config
       e = k.slice(1)
       v ?= {}
       v.environment = e
-      @_environments[e] = v
+      @environments[e] = v
       delete @_config[k]
     _.defaults @_config, @_defaults
     @_initPaths @_config.paths
-    for k,v of @_environments
+    for k,v of @environments
       @_initPaths v.paths  if v.paths?
       _.defaults v, @_config
     @_config.environment = environment
-    @config = @_environments[environment] or @_config
-    log.error '!!!! config:', @config
-    @config
+    @config = @environments[environment] or @_config
 
     unless @config.name?
       throw 'Invalid config: name must be defined'
@@ -80,7 +78,8 @@ class Config
 
   reset: ->
     @_config = {}
-    @_environments = {}
+    @config = {}
+    @environments = {}
     @uuid = uuid.v1()
 
   # Iterate over config collections.
