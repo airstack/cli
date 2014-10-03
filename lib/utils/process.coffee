@@ -1,6 +1,7 @@
 Promise = require 'bluebird'
 spawn = require('child_process').spawn
 exec = Promise.promisify require('child_process').exec
+escapeRegExp = require('./string').escapeRegExp
 log = require '../Logger'
 path = require 'path'
 _ = require 'lodash'
@@ -135,7 +136,12 @@ module.exports =
       Process.kill pid, signal for pid in pids
 
 
-  stats: (cmd) ->
-    # todo: implement
+  stats: (cmd, opts = {}) ->
     # ps -A -c -o pid,%cpu,%mem,rss,time,etime,command | awk 'NR == 1 || /[V]Box/' | sed -e 's/^ */"/' -e 's/$/\"/g' -e $'s/[[:space:]]\{1,\}/","/g'
+    pscmd = 'ps -A -c -o pid,%cpu,%mem,rss,time,etime,args'
+    pscmd += " | awk 'NR == 1 || /#{escapeRegExp cmd}/"
+    pscmd += ' | sed -e \'s/^ */"/\' -e \'s/$/\"/g\' -e $\'s/[[:space:]]\{1,\}/","/g\''
+    UtilsProcess.exec pscmd, opts
+    .spread (stdout, stderr) ->
+      stdout.trim().split ','
 
