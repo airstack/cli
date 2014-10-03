@@ -15,7 +15,7 @@ class Commands
   config: null
 
   constructor: (opts) ->
-    {@vm, @_config} = opts
+    {@vm, @_config, @cli} = opts
     @config = @_config.config
     @make = new Make
 
@@ -45,8 +45,9 @@ class Commands
     .then ->
       log.info '[ DONE ]'.grey
 
-  build: (config = @config) ->
-    log.debug 'config', config
+  build: (config) ->
+    config ?= @config
+    log.debug 'build config:', config
     @make.make 'build', config
 
   build_all: ->

@@ -26,8 +26,8 @@ class Airstack
       @createVM()
     ]
     .then =>
-      @commands = new Commands _config: @_config, vm: @vm
-      @commands[cmd.replace '-', '_'] @cli
+      @commands = new Commands _config: @_config, vm: @vm, cli: @cli
+      @commands[cmd.replace '-', '_']()
     .then =>
       if cmd is 'up'
         @watch()
