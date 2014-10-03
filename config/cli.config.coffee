@@ -13,5 +13,5 @@ module.exports =
   ]
 
   options: {
-    env: [false, 'Environment tag in airstack.yaml', 'string', 'development']
+    env: [false, 'Environment tag in airstack.yml', 'string', 'development']
   }
