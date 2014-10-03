@@ -9,7 +9,7 @@ class Cli
   constructor: ->
     cli.setApp path.resolve __dirname, '../package.json'
     cli.enable 'version'
-    cli.parse null, cli_config.commands
+    cli.parse cli_config.options, cli_config.commands
     @options = cli.options
     @args = cli.args
     @command = cli.command

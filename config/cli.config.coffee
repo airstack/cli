@@ -8,3 +8,7 @@ module.exports =
     'build-all'
     'console'
   ]
+
+  options: {
+    env: [false, 'Environment tag in airstack.yaml', 'string', 'development']
+  }
