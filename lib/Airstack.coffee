@@ -1,5 +1,5 @@
 Config = require './Config'
-cli = require './Cli'
+Cli = require './Cli'
 log = require './Logger'
 ConfigParser = require './ConfigParser'
 Commands = require './Commands'
@@ -19,7 +19,8 @@ class Airstack
     @init()
 
   init: ->
-    cmd = cli.command
+    @cli = new Cli config: @config
+    cmd = @cli.command
     log.debug 'Command:'.bold, cmd
     Promise.all [
       @loadConfig()
@@ -27,7 +28,7 @@ class Airstack
     ]
     .then =>
       @commands = new Commands config: @config.config, vm: @vm
-      @commands[cmd] cli
+      @commands[cmd] @cli
     .then =>
       if cmd is 'up'
         @watch()
@@ -37,7 +38,7 @@ class Airstack
   loadConfig: ->
     ConfigParser.load @configFile
     .then (yamljs) =>
-      @config.init yamljs, cli.options.env
+      @config.init yamljs, @cli.options.env
       log.debug 'config', @config.config
 
   watch: ->
