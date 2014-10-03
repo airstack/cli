@@ -31,6 +31,7 @@ class Make
     AIRSTACK_BUILD_TEMPLATES_DIR: config.build.templates.dir
     AIRSTACK_BUILD_TEMPLATES_FILES: config.build.templates.files
     DEBUG_LEVEL: 2
+    TERM: 'printf "EXEC::%s" '
 
 
 module.exports = Make

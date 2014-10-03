@@ -9,6 +9,7 @@ module.exports =
     'console'
     'clean'
     'clean-all'
+    'test'
   ]
 
   options: {

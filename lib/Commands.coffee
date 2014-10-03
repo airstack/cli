@@ -58,13 +58,16 @@ class Commands
   clean_all: ->
     @all 'clean'
 
+  test: (config = @config) ->
+    @make.make 'test', config
+    .then ->
+      process.exit 2
+
   all: (cmd) ->
     Promise.all (@[cmd] config for k,config of @_config.environments)
 
   console: ->
-    @make.make 'console', @config,
-      env:
-        TERM: 'printf "EXEC::%s" '
+    @make.make 'console', @config
     .then ->
       # Exit with code=2 to trigger cli to eval EXEC string
       # See bin/airstack
