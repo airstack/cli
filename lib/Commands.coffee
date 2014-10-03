@@ -45,21 +45,29 @@ class Commands
     .then ->
       log.info '[ DONE ]'.grey
 
-  build: (config) ->
-    config ?= @config
+  build: (config = @config) ->
     log.debug 'build config:', config
     @make.make 'build', config
 
   build_all: ->
-    for k,config of @_config.environments
-      @build config
+    @all 'build'
+
+  clean: (config = @config) ->
+    @make.make 'clean', config
+
+  clean_all: ->
+    @all 'clean'
+
+  all: (cmd) ->
+    Promise.all (@[cmd] config for k,config of @_config.environments)
 
   console: ->
     @make.make 'console', @config,
       env:
-        TERM: 'printf "EXEC::%s" '  # See bin/airstack
-    .then (a, b) =>
-      process.stdout.write a.data
+        TERM: 'printf "EXEC::%s" '
+    .then ->
+      # Exit with code=2 to trigger cli to eval EXEC string
+      # See bin/airstack
       process.exit 2
 
   run: ->

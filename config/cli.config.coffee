@@ -7,6 +7,8 @@ module.exports =
     'build'
     'build-all'
     'console'
+    'clean'
+    'clean-all'
   ]
 
   options: {
