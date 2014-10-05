@@ -4,12 +4,11 @@
 # calling #start to ensure the correct pid is obtained.
 
 Promise = require 'bluebird'
-ps = require './utils/process'
+Ps = require './Ps'
 path = require 'path'
 fsOpen = Promise.promisify require('fs').open
 config = require './Config'
 utils = require './utils'
-log = require './Logger'
 
 
 class Process
@@ -35,7 +34,10 @@ class Process
   stdout: null
   stderr: null
 
-  constructor: ->
+  constructor: (opts) ->
+    {@app} = opts
+    @log = @app.log
+    @ps = new Ps app: @app
     @_fullCmd = path.join @_cmdPath, @_cmd
 
   toString: ->
@@ -66,13 +68,13 @@ class Process
   # opts.args {Array}     Cmd args to use when starting process
   # @return Promise
   start: ->
-    log.info "[#{@_cmd}]".grey, 'starting'
+    @log.info "[#{@_cmd}]".grey, 'starting'
     @init false
     .then =>
       if @_detached
         @_opts.detached = true
         @_opts.stdio = ['ignore', @stdout, @stderr]
-      ps.spawn @_fullCmd, @_args, @_opts
+      @ps.spawn @_fullCmd, @_args, @_opts
     .then (results) =>
       @_pid = results.pid
 
@@ -83,13 +85,13 @@ class Process
       @start()  unless @_pid
 
   lookupPid: ->
-    ps.pgrep @_fullCmd, oldest: true
+    @ps.pgrep @_fullCmd, oldest: true
     .then (pids) =>
       @_pid = pids[0]
       if @_pid
-        log.info "[#{@_cmd}]".grey, 'already running:', @_pid
+        @log.info "[#{@_cmd}]".grey, 'already running:', @_pid
       else
-        log.info "[#{@_cmd}]".grey, 'not running'
+        @log.info "[#{@_cmd}]".grey, 'not running'
 
   status: ->
     # todo: implement by querying ps and getting cpu, mem, etc.
@@ -98,12 +100,12 @@ class Process
     # ps -A -o pid,%cpu,%mem,rss,time,etime,command | grep "[V]Box"
 
   kill: (signal = 'SIGTERM') ->
-    log.info "[#{@_cmd}]".grey, 'stopping'
-    ps.killAll @_fullCmd, signal
+    @log.info "[#{@_cmd}]".grey, 'stopping'
+    @ps.killAll @_fullCmd, signal
 
   reload: ->
-    log.info "[#{@_cmd}]".grey, 'reloading'
-    ps.killAll @_fullCmd, 'SIGHUP'
+    @log.info "[#{@_cmd}]".grey, 'reloading'
+    @ps.killAll @_fullCmd, 'SIGHUP'
 
   getConfigFile: ->
     @_configFilePath ?= path.join config.configDir, @_configFile
@@ -117,12 +119,12 @@ class Process
     .then (configExists) =>
       return true  if configExists
       src = path.join __dirname, '../config', @_configFile
-      log.debug '[ init ]'.grey, "Copying #{src} to #{conf}"
+      @log.debug '[ init ]'.grey, "Copying #{src} to #{conf}"
       utils.fs.mkdir config.configDir
       .then ->
-        ps.exec "cp #{src} #{conf}", timeout: 100
-      .spread (stdout, stderr) ->
-        log.debug stderr  if stderr
+        @ps.exec "cp #{src} #{conf}", timeout: 100
+      .spread (stdout, stderr) =>
+        @log.debug stderr  if stderr
     .then =>
       @_configFile = conf
 

@@ -1,13 +1,18 @@
 Promise = require 'bluebird'
 spawn = require('child_process').spawn
 exec = Promise.promisify require('child_process').exec
-escapeRegExp = require('./string').escapeRegExp
-log = require '../Logger'
+escapeRegExp = require('./utils/string').escapeRegExp
 path = require 'path'
 _ = require 'lodash'
 
 
-module.exports = UtilsProcess =
+class Ps
+
+  constructor: (opts) ->
+    {@app} = opts
+    @log = @app.log
+
+
   ###*
   # @param {Array} cmds  Array of string or array commands.
   #                      String commands will use process.exec.
@@ -36,8 +41,8 @@ module.exports = UtilsProcess =
     # remove spaces from cmd and extract the bin name
     cmd = cmd.replace /\/(.+?)\s+(.+?)\//g, '/$1$2/' #/ << extra slash for sublime highlighter
     cmd = cmd.split(' ')[0].split(path.sep).slice(-1)[0]
-    debug = (type, msg) ->
-      log.debug type, msg.toString().trim()  if msg
+    debug = (type, msg) =>
+      @log.debug type, msg.toString().trim()  if msg
       msg
     _.defaults opts,
       stdout: debug.bind null, "#{cmd} stdout >>".grey
@@ -51,8 +56,8 @@ module.exports = UtilsProcess =
   exec(cmd, opts).spread (stdout, stderr) ->
   ###
   exec: (cmd, opts = {}) ->
-    UtilsProcess._execDefaults cmd, opts
-    log.debug "[exec]".grey, cmd
+    @_execDefaults cmd, opts
+    @log.debug "[exec]".grey, cmd
     exec cmd, opts
     .spread (stdout, stderr) ->
       opts.stdout stdout
@@ -68,12 +73,12 @@ module.exports = UtilsProcess =
       opts = args
       args = cmd[1]
       cmd = cmd[0]
-    UtilsProcess._execDefaults cmd, opts
+    @_execDefaults cmd, opts
     _stdout = ''
     _stderr = ''
     # todo: use cancellable and timeout
-    new Promise (resolve, reject) ->
-      log.debug "[spawn]".grey, "#{cmd} #{args.join ' '}"
+    new Promise (resolve, reject) =>
+      @log.debug "[spawn]".grey, "#{cmd} #{args.join ' '}"
       proc = spawn cmd, args, opts
       if opts.detached
         pid = proc.pid
@@ -90,7 +95,6 @@ module.exports = UtilsProcess =
 
   # Use with spawn streams to handle output
   output:
-    # Redirect output to log.debug
     intercept: (msg) ->
       process.stderr.write msg.toString()
       ''
@@ -103,13 +107,13 @@ module.exports = UtilsProcess =
 
 
   # @return {Array}  pids
-  pgrep: (cmd, opts = {}) ->
+  pgrep: (cmd, opts = {}, log) ->
     _.defaults opts,
       timeout: 100
       oldest: false
-      stdout: UtilsProcess.output.silent
+      stdout: @output.silent
     flags = if opts.oldest then '-o' else ''
-    UtilsProcess.exec "pgrep #{flags} -d ',' -f #{cmd}", opts
+    @exec "pgrep #{flags} -d ',' -f #{cmd}", opts
     .spread (stdout, stderr) =>
       pids = stdout.trim().split(',').map (pid) ->
         parseInt pid
@@ -119,20 +123,20 @@ module.exports = UtilsProcess =
       if err.cause and err.cause.code is 1
         Promise.resolve []
       else
-        log.error '[pgrep]'.grey, err
+        @log.error '[pgrep]'.grey, err
         Promise.reject err
 
 
   kill: (pid, signal = 'SIGTERM') ->
     if pid
-      log.debug '[kill]'.grey, "Sending #{signal} to #{pid}"
+      @log.debug '[kill]'.grey, "Sending #{signal} to #{pid}"
       process.kill pid, signal
 
 
   killAll: (cmd, signal = 'SIGTERM', opts = {}) ->
-    UtilsProcess.pgrep cmd, opts
+    @pgrep cmd, opts
     .then (pids) =>
-      UtilsProcess.kill pid, signal for pid in pids
+      @kill pid, signal for pid in pids
 
 
   stats: (cmd, opts = {}) ->
@@ -140,7 +144,9 @@ module.exports = UtilsProcess =
     pscmd = 'ps -A -c -o pid,%cpu,%mem,rss,time,etime,args'
     pscmd += " | awk 'NR == 1 || /#{escapeRegExp cmd}/"
     pscmd += ' | sed -e \'s/^ */"/\' -e \'s/$/\"/g\' -e $\'s/[[:space:]]\{1,\}/","/g\''
-    UtilsProcess.exec pscmd, opts
+    @exec pscmd, opts
     .spread (stdout, stderr) ->
       stdout.trim().split ','
 
+
+module.exports = Ps

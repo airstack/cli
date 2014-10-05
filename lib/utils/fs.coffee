@@ -6,9 +6,7 @@ _ = require 'lodash'
 randomString = require('./string').random
 
 
-module.exports =
-  _tmpDir: path.join os.tmpdir(), '.airstack'
-
+module.exports = UtilsFs =
   ###*
   Create specified directory.
 
@@ -26,7 +24,7 @@ module.exports =
       stat
     .catch (err) =>
       if err.cause.code is 'ENOENT'
-        @mkdir path.dirname(dir), mode
+        UtilsFs.mkdir path.dirname(dir), mode
         .then ->
           fs.mkdirAsync dir, mode
       else
@@ -47,7 +45,7 @@ module.exports =
   ###
   randomTmpFile: (filename) ->
     filename = randomString 10  unless filename
-    path.join os.tmpdir(), @randomTmpDir(), filename
+    path.join os.tmpdir(), UtilsFs.randomTmpDir(), filename
 
 
   ###*
@@ -55,11 +53,12 @@ module.exports =
 
   Does not guarantee uniqueness.
   ###
-  randomTmpDir: ->
+  randomTmpDir: (base) ->
+    base ?= path.join os.tmpdir(), 'airstack'
     dir = [
       'tmp-'
       process.pid
       '-'
       (Math.random() * 0x1000000000).toString 36
     ].join ''
-    path.join @_tmpDir, dir, randomString 5
+    path.join base, dir, randomString 5

@@ -1,10 +1,13 @@
-log = require '../lib/Logger'
 _ = require 'lodash'
 _.defaults = require('../lib/utils/object').deepDefaults
-spawn = require('../lib/utils/process').spawn
+Ps = require '../lib/Ps'
 path = require 'path'
 
 class Make
+  constructor: (opts) ->
+    {@app} = opts
+    @ps = new Ps app: @app
+
   make: (target, config, opts = {}) ->
     args = [
       "-f"
@@ -17,10 +20,11 @@ class Make
         process.stdout.write data
       stderr: (data) ->
         process.stderr.write data
-    log.debug 'make env:', opts
-    spawn 'make', args, opts
+    @app.log.debug 'make env:', opts
+    @ps.spawn 'make', args, opts
 
   env: (config) ->
+    DEBUG_LEVEL: 2
     HOME: process.env.HOME
     PATH: process.env.PATH
     PWD: process.env.PWD
@@ -28,9 +32,9 @@ class Make
     AIRSTACK_ENV: config.environment
     AIRSTACK_MAKEFILE: config.build.makefile
     AIRSTACK_IMAGE_NAME: config.name
-    AIRSTACK_BUILD_TEMPLATES_DIR: config.build.templates.dir
+    AIRSTACK_BUILD_TEMPLATES_DIR: config.build.templates._cacheDir or config.build.templates.dir
     AIRSTACK_BUILD_TEMPLATES_FILES: config.build.templates.files
-    DEBUG_LEVEL: 2
+    AIRSTACK_BUILD_DIR: config.build.dir
     TERM: 'printf "EXEC::%s" '
 
 

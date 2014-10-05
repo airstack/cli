@@ -1,4 +1,3 @@
-log = require './Logger'
 utils = require './utils'
 os = require 'os'
 path = require 'path'
@@ -18,6 +17,9 @@ class Config
 
   _defaults:
     environment: 'development'
+    build:
+      dir: '.airstack/build'
+      cache: '.airstack/cache'
     paths:
       airstack:
         home: AIRSTACK_HOME

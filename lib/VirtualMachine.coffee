@@ -14,8 +14,8 @@ class VirtualMachine
   up: ->
   status: ->
 
-  @factory: (type) ->
-    new (require "../plugins/#{type}")
+  @factory: (type, opts) ->
+    new (require "../plugins/#{type}")(opts)
 
 
 module.exports = VirtualMachine

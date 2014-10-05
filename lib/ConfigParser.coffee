@@ -17,8 +17,8 @@ ConfigParser =
   _loadFile: (file, encoding = @defaults.encoding) ->
     readFile path.normalize(file), encoding
 
-  parse: (template, data = {}) ->
-    eco.render template, data
+  parse: (template) ->
+    eco.render template
 
 
 module.exports = ConfigParser

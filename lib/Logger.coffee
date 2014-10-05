@@ -1,17 +1,15 @@
 winston = require 'winston'
 
+__instance__ = null
+
 ###*
 Centralized logger.
 
 Use Logger instead of console.
-
-Logger.Logger can be used to create a new instance if needed.
 ###
 class Logger
-  Logger: @constructor
-
   # Enable logs for levels <= level
-  level: 'debug'
+  level: 'trace'
 
   levels:
     trace: 0
@@ -35,6 +33,7 @@ class Logger
     @logger = new winston.Logger
       levels: @levels
       colors: @colors
+      padLevels: true
       transports: [
         new winston.transports.Console
           level: @level
@@ -44,10 +43,21 @@ class Logger
           timestamp: false
       ]
 
+  # Getters/Setters
+  Object.defineProperties @prototype,
+    instance:
+      get: ->
+        __instance__ ?= new Logger
+        __instance__
+      set: (inst) ->
+        __instance__ = inst
 
   setLevel: (level) ->
     @level = level
     @logger.transports.console.level = level
+
+  trace: ->
+    @logger.trace.apply @logger, arguments
 
   debug: ->
     @logger.debug.apply @logger, arguments
@@ -68,5 +78,4 @@ class Logger
     @logger.log.apply @logger, arguments
 
 
-# singleton
-module.exports = new Logger
+module.exports = Logger

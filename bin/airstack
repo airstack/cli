@@ -1,23 +1,20 @@
 #!/bin/sh
 
 main() {
-  local tempfile; tempfile=`mktemp -t airstack.session` || exit 1
+  local tempout; tempout=`mktemp -t airstack.session` || exit 1
+  local statusfile; statusfile=`mktemp -t airstack.session` || exit 1
   local exitcode;
 
-  # Run node in background to fix issue with docker not attaching to the terminal after node exits
-  eval $AIRSTACK_HOME/package/nodejs/node/bin/node --harmony $AIRSTACK_HOME/package/airstack/cli/bin/cli.js $@ > $tempfile &
+  # Send stdout to $tempout for later parsing
+  { $AIRSTACK_HOME/package/nodejs/node/bin/node --harmony $AIRSTACK_HOME/package/airstack/cli/bin/cli.js $@; echo $? > $statusfile; } | tee $tempout
 
-  # Wait for each child process to finish
-  for job in `jobs -p`; do
-    # Set exitcode if not 0
-    wait $job || let "exitcode=$?"
-  done
+  exitcode=`cat $statusfile`
 
   # This is a bit hacky but it works.
   # For commands that need to run in the current shell,
   # the CLI prints "EXEC::$CMD" and returns code=2.
   if [ "$exitcode" = 2 ]; then
-    local output; output=`tail -n1 $tempfile`
+    local output; output=`tail -n1 $tempout`
     if [ ! "${output##EXEC::*}" ]; then
       output=`echo $output | sed -e 's/^EXEC:://'`
       printf "\nRUNNING COMMAND >> $output\n"

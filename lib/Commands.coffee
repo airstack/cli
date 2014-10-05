@@ -1,28 +1,32 @@
 # Builder = require './Builder'
 # Docker = require './Docker'
 Make = require '../plugins/Make'
-log = require './Logger'
+eco = require 'eco'
 Promise = require 'bluebird'
 Samba = require '../plugins/Samba'
-
+path = require 'path'
+readFile = Promise.promisify require('fs').readFile
+writeFile = Promise.promisify require('fs').writeFile
+mkdir = require('./utils/fs').mkdir
+util = require 'util'
 
 class Commands
   # boot2docker info object
   info: {}
   # boot2docker host ip
   ip: null
-  # Airstack config instance
-  config: null
 
   constructor: (opts) ->
-    {@vm, @_config, @cli} = opts
-    @config = @_config.config
-    @make = new Make
+    {@app} = opts
+    @log = @app.log
+    @vm = @app.vm
+    @make = new Make app: @app
 
   # Getters/Setters
   Object.defineProperties @prototype,
     samba:
-      get: -> @_samba ?= new Samba config: @config
+      get: -> @_samba ?= new Samba app: @app
+
 
   up: ->
     Promise.all [
@@ -42,36 +46,51 @@ class Commands
       @samba.kill()
       @vm.down()
     ]
-    .then ->
-      log.info '[ DONE ]'.grey
+    .then =>
+      @log.info '[ DONE ]'.grey
 
-  build: (config = @config) ->
-    log.debug 'build config:', config
-    @make.make 'build', config
+  build: (config = @app.config) ->
+    @log.debug 'build config:', config
+    @buildCache config
+    .then =>
+      @make.make 'build', config
+
+  buildCache: (config = @app.config) ->
+    cacheDir = path.join config.build.cache, config.build.templates.dir
+    config.build.templates._cacheDir = cacheDir
+    mkdir cacheDir, 0o755
+    .then =>
+      files = for fileName in config.build.templates.files.split ' '
+        @buildCacheFile fileName, cacheDir, config
+      Promise.all files
+
+  buildCacheFile: (fileName, cacheDir, config = @app.config) ->
+    readFile path.join(config.build.templates.dir, fileName), 'utf8'
+    .then (tpl) ->
+      tpl = eco.render tpl, config: config
+      writeFile path.join(cacheDir, fileName), tpl, encoding: 'utf8', mode: 0o666
 
   build_all: ->
     @all 'build'
 
-  clean: (config = @config) ->
+  clean: (config = @app.config) ->
     @make.make 'clean', config
 
   clean_all: ->
     @all 'clean'
 
-  test: (config = @config) ->
+  test: (config = @app.config) ->
     @make.make 'test', config
-    .then ->
-      process.exit 2
+    .then =>
+      @app.emit 'exit', code: 2
 
   all: (cmd) ->
-    Promise.all (@[cmd] config for k,config of @_config.environments)
+    Promise.all (@[cmd] config for k,config of @app._config.environments)
 
   console: ->
-    @make.make 'console', @config
-    .then ->
-      # Exit with code=2 to trigger cli to eval EXEC string
-      # See bin/airstack
-      process.exit 2
+    @make.make 'console', @app.config
+    .then =>
+      @app.emit 'exit', code: 2
 
   run: ->
     # @docker.run()

@@ -7,9 +7,8 @@ VM_UUID=$(VBoxManage list runningvms | grep boot2docker | cut -d ' ' -f 2 | sed 
 ###
 
 VirtualMachine = require '../lib/VirtualMachine'
-ps = require '../lib/utils/process'
+Ps = require '../lib/Ps'
 Promise = require 'bluebird'
-log = require '../lib/Logger'
 
 
 class VirtualBox extends VirtualMachine
@@ -21,9 +20,12 @@ class VirtualBox extends VirtualMachine
     ip: 'boot2docker ip'
     info: 'boot2docker info'
 
-  constructor: ->
+  constructor: (opts) ->
+    {@app} = opts
+    @log = @app.log
     @_info = {}
     @_ip = null
+    @ps = new Ps app: @app
 
   # Getters/Setters
   Object.defineProperties @prototype,
@@ -40,11 +42,11 @@ class VirtualBox extends VirtualMachine
   # Get info and ip, return info
   info: ->
     silent =
-      data: ps.output.silent
-      error: ps.output.silent
+      data: @ps.output.silent
+      error: @ps.output.silent
 
     # todo: use cancellable and timeout
-    info = ps.exec @cmd.info, silent
+    info = @ps.exec @cmd.info, silent
     .spread (stdout, stderr) =>
       try
         @_info = JSON.parse "#{stdout}".trim()
@@ -55,11 +57,11 @@ class VirtualBox extends VirtualMachine
     .catch (err) =>
       @_info = {}
 
-    ip = ps.exec @cmd.ip, silent
+    ip = @ps.exec @cmd.ip, silent
     .spread (stdout, stderr) =>
       @_ip = stdout or null
     .catch (err) =>
-      log.warn 'Unable to get Docker IP'
+      @log.warn 'Unable to get Docker IP'
       @_ip = null
 
     Promise.all [
@@ -75,7 +77,7 @@ class VirtualBox extends VirtualMachine
       @_startVM()  unless @running
 
   down: ->
-    ps.spawn @cmd.down
+    @ps.spawn @cmd.down
 
   status: ->
     @info()
@@ -95,9 +97,9 @@ class VirtualBox extends VirtualMachine
     # `boot2docker delete && boot2docker init`
 
   _startVM: ->
-    ps.spawn @cmd.start,
+    @ps.spawn @cmd.start,
       # Redirect error output to show progress in realtime
-      error: ps.output.intercept
+      error: @ps.output.intercept
     .then =>
       @info()
 
