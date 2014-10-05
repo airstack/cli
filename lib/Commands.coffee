@@ -27,6 +27,8 @@ class Commands
     samba:
       get: -> @_samba ?= new Samba app: @app
 
+  config: ->
+    process.stdout.write util.format '[CONFIG]\n%j\n', @app.config
 
   up: ->
     Promise.all [

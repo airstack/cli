@@ -10,6 +10,7 @@ module.exports =
     'clean'
     'clean-all'
     'test'
+    'config'
   ]
 
   options: {
