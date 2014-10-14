@@ -11,6 +11,8 @@ module.exports =
     'clean-all'
     'test'
     'config'
+    'run'
+    'shell'
   ]
 
   options: {

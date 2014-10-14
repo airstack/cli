@@ -91,13 +91,18 @@ class Commands
   all: (cmd) ->
     Promise.all (@[cmd] config for k,config of @app._config.environments)
 
+  shell: ->
+    @make.make 'shell', @app.config
+    .then =>
+      @app.emit 'exit', code: 2
+
   console: ->
     @make.make 'console', @app.config
     .then =>
       @app.emit 'exit', code: 2
 
   run: ->
-    # @docker.run()
+    @make.make 'run', @app.config
 
   cleanup: ->
     @samba.kill()
