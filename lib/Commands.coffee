@@ -81,8 +81,10 @@ class Commands
   clean_all: ->
     @all 'clean'
 
-  test: (config = @app.config) ->
-    @make.make 'test', config
+  test: ->
+    config = @app._config.environments['test']
+    config.cmd_console = config.cmd
+    @make.make 'console', config
     .then =>
       @app.emit 'exit', code: 2
 
