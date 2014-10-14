@@ -70,6 +70,8 @@ class Commands
     readFile path.join(config.build.templates.dir, fileName), 'utf8'
     .then (tpl) ->
       tpl = eco.render tpl, config: config
+      # Remove inline comments in commands; Docker does not support this
+      tpl = tpl.replace /^[ \t]+#.*$(\r\n|\n|\r)/mg, ''
       writeFile path.join(cacheDir, fileName), tpl, encoding: 'utf8', mode: 0o666
 
   build_all: ->
