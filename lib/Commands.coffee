@@ -58,7 +58,7 @@ class Commands
       @make.make 'build', config
 
   buildCache: (config = @app.config) ->
-    cacheDir = path.join config.build.cache, config.build.templates.dir
+    cacheDir = path.join config.build.cache, config.build.templates.dir, config.environment
     config.build.templates._cacheDir = cacheDir
     mkdir cacheDir, 0o755
     .then =>
