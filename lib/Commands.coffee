@@ -68,6 +68,8 @@ class Commands
         @buildCacheFile fileName, cacheDir, config
       Promise.all files
 
+  build_cache: @::buildCache
+
   buildCacheFile: (fileName, cacheDir, config = @app.config) ->
     readFile path.join(config.build.templates.dir, fileName), 'utf8'
     .then (tpl) ->

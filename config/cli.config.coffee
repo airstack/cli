@@ -6,6 +6,7 @@ module.exports =
     'down'
     'build'
     'build-all'
+    'build-cache'
     'console'
     'clean'
     'clean-all'
