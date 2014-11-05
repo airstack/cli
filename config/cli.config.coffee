@@ -13,6 +13,8 @@ module.exports =
     'config'
     'run'
     'shell'
+    'cli-edit'
+    'cli-update'
   ]
 
   options: {

@@ -31,12 +31,14 @@ class Config
         # It's best if config files are universal for an Airstack install.
         # Only one of Samba, VirtualBox, etc. can be running at a time.
         config: 'config'
+        cli: 'package/airstack/cli/'
         # Default location to mount dirs in container if not specified in mount
         mount: '/home/airstack/mount/'
         bootstrap: 'package/airstack/bootstrap/'
 
   constructor: ->
     @reset()
+    @init {}
 
   init: (config = {}, environment = @_defaults.environment) ->
     @_config = _.cloneDeep config
@@ -54,9 +56,6 @@ class Config
       _.defaults v, @_config
     @_config.environment = environment
     @config = @environments[environment] or @_config
-
-    unless @config.name?
-      throw 'Invalid config: name must be defined'
 
   _initPaths: (paths) ->
     home = paths.airstack.home

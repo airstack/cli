@@ -35,6 +35,8 @@ class Airstack
     @log.debug 'Command:'.bold, cmd
 
     @loadConfig()
+    .catch =>
+      @log.warn "No #{@configFile} file found."
     .then =>
       @log.debug 'config', @_config.config
       @commands = new Commands app: @app

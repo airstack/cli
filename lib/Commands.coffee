@@ -1,6 +1,7 @@
 # Builder = require './Builder'
 # Docker = require './Docker'
 Make = require '../plugins/Make'
+Ps = require '../lib/Ps'
 eco = require 'eco'
 Promise = require 'bluebird'
 Samba = require '../plugins/Samba'
@@ -21,6 +22,7 @@ class Commands
     @log = @app.log
     @vm = @app.vm
     @make = new Make app: @app
+    @ps = new Ps app: @app
 
   # Getters/Setters
   Object.defineProperties @prototype,
@@ -105,6 +107,14 @@ class Commands
 
   run: ->
     @make.make 'run', @app.config
+
+  cli_update: ->
+    @ps.spawn 'git', ['pull'],
+      cwd: @app.config.paths.airstack.cli
+
+  cli_edit: ->
+    @ps.spawn 'edit', [@app.config.paths.airstack.cli]
+
 
   cleanup: ->
     @samba.kill()
